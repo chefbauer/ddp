@@ -10,7 +10,7 @@ namespace ddp {
 static const char *const TAG = "ddp_addressable_light_effect";
 
 // INIT
-Color DDPAddressableLightEffect::temp_array_public[512] = { Color::WHITE }; 
+Color DDPAddressableLightEffect::temp_array_public[512] = { Color::BLACK }; 
 
 DDPAddressableLightEffect::DDPAddressableLightEffect(const std::string &name) : AddressableLightEffect(name) {}
 
@@ -130,7 +130,7 @@ uint16_t DDPAddressableLightEffect::process_(const uint8_t *payload, uint16_t si
   // }
 
   // loop through all pixels being displayed now.
-  used = 8; // Override
+  used = 6; // Override
   unsigned int pixel = 0;
   for (uint16_t i = used; i < used+(num_pixels*3); i+=3) {
 
