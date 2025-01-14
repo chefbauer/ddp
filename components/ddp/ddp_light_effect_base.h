@@ -31,6 +31,7 @@ class DDPLightEffectBase {
   void set_timeout(uint32_t timeout) {this->timeout_ = timeout;}
   void set_disable_gamma(bool disable_gamma) { this->disable_gamma_ = disable_gamma;}
   void set_scaling_mode(DDPScalingMode scaling_mode) { this->scaling_mode_ = scaling_mode;}
+  void set_background_only_mode(bool background_only_mode) {this->background_only_mode_ = background_only_mode;}
 
  protected:
   DDPComponent *ddp_{nullptr};
@@ -39,6 +40,7 @@ class DDPLightEffectBase {
   uint32_t last_ddp_time_ms_{0};
 
   bool disable_gamma_{true};
+  bool background_only_mode_{false};
   float gamma_backup_{0.0};
   bool next_packet_will_be_first_{true};
 

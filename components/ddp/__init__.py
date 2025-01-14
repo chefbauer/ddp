@@ -27,6 +27,8 @@ CONF_DDP_ID = "ddp_id"
 CONF_DDP_TIMEOUT = "timeout"
 CONF_DDP_DIS_GAMMA = "disable_gamma"
 CONF_DDP_SCALING = "brightness_scaling"
+CONF_DDP_BACKGROUND_ONLY_MODE = "background_only_mode"
+CONF_DDP_SAVE_TO_ID = "save_to_id"
 
 CONFIG_SCHEMA = cv.All(
     cv.Schema(
@@ -80,5 +82,8 @@ async def ddp_light_effect_to_code(config, effect_id):
 
     if CONF_DDP_SCALING in config:
         cg.add(effect.set_scaling_mode(DDP_SCALING[config[CONF_DDP_SCALING]]))
+
+    if background_only_mode in config:
+        cg.add(effect.set_background_only_mode(DDP_SCALING[config[background_only_mode]]))
 
     return effect
