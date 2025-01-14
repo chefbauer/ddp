@@ -5,8 +5,8 @@
 #include "esphome/core/log.h"
 
 namespace esphome {
-namespace ddp {
 namespace globals {
+namespace ddp {
 
 static const char *const TAG = "ddp_addressable_light_effect";
 
@@ -204,7 +204,8 @@ void DDPAddressableLightEffect::set_max_brightness_() {
   this->get_addressable_()->update_state(this->state_);
 }
 
-}  // namespace e131
+}  // namespace ddp
+}  // namespace globals
 }  // namespace esphome
 
 #endif  // USE_ARDUINO
