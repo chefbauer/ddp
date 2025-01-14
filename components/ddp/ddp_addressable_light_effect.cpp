@@ -130,7 +130,7 @@ uint16_t DDPAddressableLightEffect::process_(const uint8_t *payload, uint16_t si
   // }
 
   // loop through all pixels being displayed now.
-  used = 9; // Override
+  used = 8; // Override
   unsigned int pixel = 0;
   for (uint16_t i = used; i < used+(num_pixels*3); i+=3) {
 
