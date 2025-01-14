@@ -9,6 +9,9 @@ namespace ddp {
 
 static const char *const TAG = "ddp_addressable_light_effect";
 
+// INIT
+Color DDPAddressableLightEffect::temp_array_public[512] = {0}; 
+
 DDPAddressableLightEffect::DDPAddressableLightEffect(const std::string &name) : AddressableLightEffect(name) {}
 
 const std::string &DDPAddressableLightEffect::get_name() { return AddressableLightEffect::get_name(); }
@@ -139,7 +142,10 @@ uint16_t DDPAddressableLightEffect::process_(const uint8_t *payload, uint16_t si
     //it_bg->value()[i] = Color(red,green,blue);
     //id(it_bg)[i] = Color(red,green,blue);
     //esphome::globals::it_bg->value()[i] = Color(red,green,blue);
-    this->temp_array_[i/3] = Color(red,green,blue);
+    //this->temp_array_[i/3] = Color(red,green,blue);
+    this->temp_array_public[i/3] = Color(red,green,blue);
+
+
     // set multiplier for this pixel if in pixel scaling mode
     if ( this->scaling_mode_ == DDP_SCALE_PIXEL ) {
         uint8_t max_val = 0;
@@ -172,6 +178,7 @@ uint16_t DDPAddressableLightEffect::process_(const uint8_t *payload, uint16_t si
     // assign pixel color
     //auto output = (*it)[(i-used)/3];
     //output.set_rgb(red, green, blue);
+
   }
 
   //it->schedule_show();

@@ -12,7 +12,7 @@ namespace ddp {
 class DDPAddressableLightEffect : public DDPLightEffectBase, public light::AddressableLightEffect {
  public:
   DDPAddressableLightEffect(const std::string &name);
-  Color temp_array_public[512]; // NEU
+  static Color temp_array_public[512]; // NEU
 
   const std::string &get_name() override;
 
