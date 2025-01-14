@@ -134,7 +134,7 @@ uint16_t DDPAddressableLightEffect::process_(const uint8_t *payload, uint16_t si
     uint8_t green = payload[i+1];
     uint8_t blue  = payload[i+2];
 
-    schreibe in it_bg array (Globale Variable lol)
+    //schreibe in it_bg array (Globale Variable lol)
     id(it_bg)[i] = Color(red,green,blue);
 
     // set multiplier for this pixel if in pixel scaling mode
