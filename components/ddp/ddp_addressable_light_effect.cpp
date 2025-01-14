@@ -6,6 +6,7 @@
 
 namespace esphome {
 namespace ddp {
+namespace globals {
 
 static const char *const TAG = "ddp_addressable_light_effect";
 
