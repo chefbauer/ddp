@@ -5,7 +5,6 @@
 #include "esphome/core/log.h"
 
 namespace esphome {
-namespace globals {
 namespace ddp {
 
 static const char *const TAG = "ddp_addressable_light_effect";
@@ -137,8 +136,8 @@ uint16_t DDPAddressableLightEffect::process_(const uint8_t *payload, uint16_t si
 
     //schreibe in it_bg array (Globale Variable lol)
     //my_global->value() = ;
-    globals::it_bg->value()[i] = Color(red,green,blue);
-
+    //globals::it_bg->value()[i] = Color(red,green,blue);
+    Globals::id(it_bg)[i] = Color(red,green,blue);
     // set multiplier for this pixel if in pixel scaling mode
     if ( this->scaling_mode_ == DDP_SCALE_PIXEL ) {
         uint8_t max_val = 0;
@@ -205,7 +204,6 @@ void DDPAddressableLightEffect::set_max_brightness_() {
 }
 
 }  // namespace ddp
-}  // namespace globals
 }  // namespace esphome
 
 #endif  // USE_ARDUINO
