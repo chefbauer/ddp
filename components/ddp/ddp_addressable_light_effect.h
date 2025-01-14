@@ -28,7 +28,7 @@ class DDPAddressableLightEffect : public DDPLightEffectBase, public light::Addre
   float multiplier_from_max_val_(uint8_t max_val);
   void set_max_brightness_();
 
-  Color temp_array_[512]; // NEU
+  //Color temp_array_[512]; // NEU
 
 };
 

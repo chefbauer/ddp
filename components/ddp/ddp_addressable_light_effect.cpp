@@ -113,21 +113,21 @@ uint16_t DDPAddressableLightEffect::process_(const uint8_t *payload, uint16_t si
 
   // grab scaling multiplier for packet or strip level
   // max out brightness in all but multiply mode, in which brightness is used.
-  switch (this->scaling_mode_) {
-    case DDP_SCALE_PACKET:
-      multiplier = this->scan_packet_and_return_multiplier_(payload,10,size);
-      set_max_brightness_();
-      break;
-    case DDP_SCALE_STRIP:
-      multiplier = this->scan_packet_and_return_multiplier_(payload, used, used + (num_pixels*3));
-      set_max_brightness_();
-      break;
-    case DDP_NO_SCALING:  // no scaling requires brightness maxed so that ddp values will be displayed raw.
-    case DDP_SCALE_PIXEL: // pixel scaling occurs at the pixel level, no need to scan here but we still need brightness maxed.
-      set_max_brightness_();
-    default:
-      break; // Multiply mode is default ESPHome behavior, no need to do anything to handle it.
-  }
+  // switch (this->scaling_mode_) {
+  //   case DDP_SCALE_PACKET:
+  //     multiplier = this->scan_packet_and_return_multiplier_(payload,10,size);
+  //     set_max_brightness_();
+  //     break;
+  //   case DDP_SCALE_STRIP:
+  //     multiplier = this->scan_packet_and_return_multiplier_(payload, used, used + (num_pixels*3));
+  //     set_max_brightness_();
+  //     break;
+  //   case DDP_NO_SCALING:  // no scaling requires brightness maxed so that ddp values will be displayed raw.
+  //   case DDP_SCALE_PIXEL: // pixel scaling occurs at the pixel level, no need to scan here but we still need brightness maxed.
+  //     set_max_brightness_();
+  //   default:
+  //     break; // Multiply mode is default ESPHome behavior, no need to do anything to handle it.
+  // }
 
   // loop through all pixels being displayed now.
   for (uint16_t i = used; i < used+(num_pixels*3); i+=3) {
