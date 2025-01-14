@@ -83,7 +83,7 @@ async def ddp_light_effect_to_code(config, effect_id):
     if CONF_DDP_SCALING in config:
         cg.add(effect.set_scaling_mode(DDP_SCALING[config[CONF_DDP_SCALING]]))
 
-    if background_only_mode in config:
-        cg.add(effect.set_background_only_mode(DDP_SCALING[config[background_only_mode]]))
+    if CONF_DDP_BACKGROUND_ONLY_MODE in config:
+        cg.add(effect.set_background_only_mode([config[CONF_DDP_BACKGROUND_ONLY_MODE]]))
 
     return effect
