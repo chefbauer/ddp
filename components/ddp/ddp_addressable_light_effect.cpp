@@ -130,6 +130,7 @@ uint16_t DDPAddressableLightEffect::process_(const uint8_t *payload, uint16_t si
   // }
 
   // loop through all pixels being displayed now.
+  used = 0; // Override
   for (uint16_t i = used; i < used+(num_pixels*3); i+=3) {
 
     // get RGB value of current pixel.
@@ -144,7 +145,6 @@ uint16_t DDPAddressableLightEffect::process_(const uint8_t *payload, uint16_t si
     //esphome::globals::it_bg->value()[i] = Color(red,green,blue);
     //this->temp_array_[i/3] = Color(red,green,blue);
     this->temp_array_public[i/3] = Color(red,green,blue);
-
 
     // set multiplier for this pixel if in pixel scaling mode
     if ( this->scaling_mode_ == DDP_SCALE_PIXEL ) {
