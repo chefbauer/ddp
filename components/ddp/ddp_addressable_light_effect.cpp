@@ -10,7 +10,7 @@ namespace ddp {
 static const char *const TAG = "ddp_addressable_light_effect";
 
 // INIT
-Color DDPAddressableLightEffect::temp_array_public[512] = {0}; 
+Color DDPAddressableLightEffect::temp_array_public[512] = {[0 ... 511] = Color::WHITE}; 
 
 DDPAddressableLightEffect::DDPAddressableLightEffect(const std::string &name) : AddressableLightEffect(name) {}
 
