@@ -11,7 +11,7 @@ namespace ddp {
 
 class DDPAddressableLightEffectBG : public DDPLightEffectBase, public light::AddressableLightEffect {
  public:
-  DDPAddressableLightEffect(const std::string &name);
+  DDPAddressableLightEffectBG(const std::string &name);
 
   const std::string &get_name() override;
 
