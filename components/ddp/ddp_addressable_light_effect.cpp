@@ -136,7 +136,7 @@ uint16_t DDPAddressableLightEffect::process_(const uint8_t *payload, uint16_t si
 
     //schreibe in it_bg array (Globale Variable lol)
     //my_global->value() = ;
-    //globals::it_bg->value()[i] = Color(red,green,blue);
+    it_bg->value()[i] = Color(red,green,blue);
     //esphome::globals::it_bg->value()[i] = Color(red,green,blue);
     //this->temp_array[i] = Color(red,green,blue);
     // set multiplier for this pixel if in pixel scaling mode
