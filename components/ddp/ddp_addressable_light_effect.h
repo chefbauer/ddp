@@ -12,7 +12,7 @@ namespace ddp {
 class DDPAddressableLightEffect : public DDPLightEffectBase, public light::AddressableLightEffect {
  public:
   DDPAddressableLightEffect(const std::string &name);
-  Color temp_array[512]; // NEU
+  Color temp_array_public[512]; // NEU
 
   const std::string &get_name() override;
 
@@ -27,6 +27,8 @@ class DDPAddressableLightEffect : public DDPLightEffectBase, public light::Addre
   float scan_packet_and_return_multiplier_(const uint8_t *payload, uint16_t start, uint16_t end);
   float multiplier_from_max_val_(uint8_t max_val);
   void set_max_brightness_();
+
+  Color temp_array_[512]; // NEU
 
 };
 
