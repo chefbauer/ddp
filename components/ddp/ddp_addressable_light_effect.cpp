@@ -139,7 +139,7 @@ uint16_t DDPAddressableLightEffect::process_(const uint8_t *payload, uint16_t si
     //it_bg->value()[i] = Color(red,green,blue);
     //id(it_bg)[i] = Color(red,green,blue);
     //esphome::globals::it_bg->value()[i] = Color(red,green,blue);
-    this->temp_array_[i] = Color(red,green,blue);
+    this->temp_array_[i/3] = Color(red,green,blue);
     // set multiplier for this pixel if in pixel scaling mode
     if ( this->scaling_mode_ == DDP_SCALE_PIXEL ) {
         uint8_t max_val = 0;
