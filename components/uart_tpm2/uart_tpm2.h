@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cmath>  // Wenn du cmath direkt in deiner Komponente benutzt
+##include <cmath>  // Wenn du cmath direkt in deiner Komponente benutzt
 #include "esphome/core/component.h"
 #include "esphome/components/uart/uart.h"
 
