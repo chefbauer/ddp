@@ -4,7 +4,7 @@ from esphome.components import uart
 # from esphome.const import CONF_ID
 # from esphome.core import coroutine
 
-# uart_tpm2_ns = cg.esphome_ns.namespace('uart_tpm2')
+uart_tpm2_ns = cg.esphome_ns.namespace('uart_tpm2')
 UARTTPM2 = uart_tpm2_ns.class_('UARTTPM2', cg.Component, uart.UARTDevice)
 
 CONFIG_SCHEMA = cv.Schema({
