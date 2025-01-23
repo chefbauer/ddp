@@ -1,10 +1,10 @@
 #pragma once
 
-#include "esphome/core/defines.h"
-
-#ifdef USE_ARDUINO
-#include "esphome/components/uart/uart.h"
+#include "esphome.h"
 #include "esphome/core/component.h"
+#include "esphome/components/uart/uart.h"
+
+#include <vector>
 
 namespace esphome {
 namespace uart_tpm2 {
