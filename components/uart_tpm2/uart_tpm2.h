@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef USE_ARDUINO
+
 // #include <array>
 // #include <cstdint>
 // #include <map>
@@ -14,7 +16,7 @@
 
 #include "esphome/components/uart/uart.h"
 #include "esphome/core/component.h"
-//#include <vector>
+#include <vector>
 
 namespace esphome {
 namespace uart_tpm2 {
