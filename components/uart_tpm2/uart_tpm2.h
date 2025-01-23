@@ -1,7 +1,8 @@
 #pragma once
 
-#ifdef USE_ARDUINO
+#include "esphome/core/defines.h"
 
+#ifdef USE_ARDUINO
 #include "esphome/components/uart/uart.h"
 #include "esphome/core/component.h"
 
