@@ -12,6 +12,8 @@
 // #include "esphome/core/automation.h"
 // #include "esphome/core/component.h"
 
+#include <vector>
+
 #include "esphome/components/uart/uart.h"
 #include "esphome/core/component.h"
 
