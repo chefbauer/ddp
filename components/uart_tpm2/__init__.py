@@ -4,14 +4,6 @@ from esphome.components import uart
 from esphome.const import CONF_ID
 from esphome.core import coroutine
 
-import esphome.codegen as cg
-import esphome.config_validation as cv
-from esphome.components import button, uart
-from esphome.const import CONF_DATA
-from esphome.core import HexInt
-from .. import uart_ns, validate_raw_data
-
-
 uart_tpm2_ns = cg.esphome_ns.namespace('uart_tpm2')
 UARTTPM2 = uart_tpm2_ns.class_('UARTTPM2', cg.Component, uart.UARTDevice)
 
