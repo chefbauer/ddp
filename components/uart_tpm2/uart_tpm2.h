@@ -6,7 +6,7 @@
 namespace esphome {
 namespace uart_tpm2 {
 
-class UARTTPM2 : public Component, public uart::UARTDevice {
+class UARTTPM2 : public uart::UARTDevice {
  public:
   UARTTPM2(uart::UARTComponent *parent) : UARTDevice(parent) {}
 
