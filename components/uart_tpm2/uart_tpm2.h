@@ -2,21 +2,8 @@
 
 #ifdef USE_ARDUINO
 
-// #include <array>
-// #include <cstdint>
-// #include <map>
-// #ifndef COMPONENT_OBIS_D0_OPTIMIZE_SIZE
-//     #include <regex>
-// #endif
-// #include <string>
-
-// #include "esphome/components/uart/uart.h"
-// #include "esphome/core/automation.h"
-// #include "esphome/core/component.h"
-
 #include "esphome/components/uart/uart.h"
 #include "esphome/core/component.h"
-#include <vector>
 
 namespace esphome {
 namespace uart_tpm2 {
