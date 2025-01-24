@@ -17,8 +17,18 @@ void UARTTPM2::loop()
 {
     static uint32_t start_time = 0; // Zeit, wann wir angefangen haben, auf weitere Daten zu warten
 
-    while (available()) 
+    const size_t max_buffer_size = 16384; // 16KB = 16384 Bytes
+    size_t buffer_used = available();
+    bool buffer_critical = buffer_used > (max_buffer_size / 2); // Über 50% belegt
+
+    while (buffer_critical || available()) // Beide Bedingungen sind wichtig
     {
+        buffer_used = available();
+
+        if (buffer_used > (max_buffer_size / 2)) {
+            ESP_LOGW("uart_tpm2", "UART Puffer zu stark belegt: %zu/%zu Bytes", buffer_used, max_buffer_size);
+        }
+
         char c = read();
 
         if (receiving_) 
@@ -39,7 +49,6 @@ void UARTTPM2::loop()
                             frames_processed_++;
                             processTPM2Packet(std::vector<char>(current_packet_.begin() + 4, current_packet_.end() - 1));
                             resetReception(); // Paket verarbeitet
-                            return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
                         }
                         else if (current_packet_.size() > expected_size)
                         {
@@ -58,7 +67,6 @@ void UARTTPM2::loop()
                                     current_packet_.push_back(next_byte);
                                     receiving_ = true;
                                 }
-                                return; // Beende die Schleife
                             }
                             else
                             {
@@ -71,7 +79,6 @@ void UARTTPM2::loop()
                                     current_packet_.push_back(next_byte);
                                     receiving_ = true;
                                 }
-                                // Kein return hier, da wir möglicherweise mehr Daten lesen müssen
                             }
                         }
                     }
@@ -80,7 +87,7 @@ void UARTTPM2::loop()
                         // Paket ist noch nicht vollständig, warten wir
                         start_time = millis(); // Setze die Startzeit neu
                     }
-                } 
+                               } 
                 else 
                 {
                     // Ungültiger Header, aber wir behalten das erste Byte, um zu sehen, ob es der Beginn eines neuen Pakets ist
@@ -97,14 +104,12 @@ void UARTTPM2::loop()
                         frames_dropped_++;
                         resetReception(); // Reset und warte auf neues Paket
                     }
-                    // Wenn hierher kommt, bedeutet es, dass wir 0xC9 erhalten haben und warten auf 0xDA
                 }
             }
             else
             {
                 // Wir haben weniger als 4 Bytes, wir warten weiterhin auf Daten
                 start_time = millis(); // Setze die Startzeit neu
-                return; // Beende die Schleife und warte auf weitere Daten
             }
         } 
         else // Wir sind nicht im Empfangsmodus
@@ -115,7 +120,14 @@ void UARTTPM2::loop()
                 receiving_ = true;
                 start_time = millis(); // Setze den Startzeitpunkt, wenn wir anfangen, ein Paket zu empfangen
             }
-            // Andere Zeichen ignorieren, bis wir 0xC9 sehen
+        }
+
+        // Überprüfen, ob der Puffer nach dieser Schleifeniteration unter 25% ist
+        buffer_used = available();
+        if (buffer_used < (max_buffer_size / 4)) // Unter 25% belegt
+        {
+            buffer_critical = false;
+            ESP_LOGI("uart_tpm2", "UART Puffer normalisiert: %zu/%zu Bytes", buffer_used, max_buffer_size);
         }
     }
 
@@ -141,7 +153,7 @@ void UARTTPM2::processTPM2Packet(const std::vector<char>& packet)
         }
     }
     memcpy(it_bg, it_intern_, sizeof(Color) * 450); // memcpy wird verwendet, da es in der Regel schneller ist
-    //ESP_LOGD("uart_tpm2", "Processed %d colors", data_index / 3);
+    ESP_LOGD("uart_tpm2", "Processed %d colors", data_index / 3);
 }
 
 void UARTTPM2::resetReception() 
@@ -155,10 +167,9 @@ void UARTTPM2::log_frame_stats() {
     ESP_LOGI("uart_tpm2", "Frames pro Sekunde: %.2f, Verworfen: %d", fps, frames_dropped_);
 }
 
-// Nicht-statische Methode, um 0x4C zu senden
 void UARTTPM2::get_one_tpm2_package() {
     write(0x4C); // Sende das Zeichen 0x4C per UART
-    //ESP_LOGI("uart_tpm2", "Gesendet: 0x4C");
+    ESP_LOGI("uart_tpm2", "Gesendet: 0x4C");
 }
 
 }  // namespace uart_tpm2
