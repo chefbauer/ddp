@@ -8,7 +8,7 @@ namespace uart_tpm2 {
 
 class UARTTPM2 : public Component, public uart::UARTDevice {
  public:
-  UARTTPM2() : UARTDevice(App.get_default_uart()) {}
+  UARTTPM2() : UARTDevice(nullptr) {}
   void setup() override;
   void loop() override;
   unsigned char it_bg[450][3]; // Interne öffentliche Variable
