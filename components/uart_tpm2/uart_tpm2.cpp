@@ -1,8 +1,5 @@
 #include "uart_tpm2.h"
 
-namespace esphome {
-namespace uart_tpm2 {
-
 void UARTTPM2::setup() {
   // Starte den Stream, falls nötig
   resetReception();
@@ -36,12 +33,12 @@ void UARTTPM2::loop() {
 
 void UARTTPM2::processTPM2Packet(const std::vector<char>& packet) {
   int data_index = 0;
-  for (int i = 0; i < std::min((int)packet.size() / 3, 512); ++i) {
+  for (int i = 0; i < std::min((int)packet.size() / 3, 450); ++i) {
     if (data_index + 2 < packet.size()) {
-      // Speichere die empfangenen Farbdaten in die globale Variable
-      id(bg_id)[i].r = packet[data_index];
-      id(bg_id)[i].g = packet[data_index + 1];
-      id(bg_id)[i].b = packet[data_index + 2];
+      // Speichere die empfangenen Farbdaten in die interne Variable
+      it_bg[i][0] = packet[data_index];
+      it_bg[i][1] = packet[data_index + 1];
+      it_bg[i][2] = packet[data_index + 2];
       data_index += 3;
     }
   }
@@ -53,6 +50,3 @@ void UARTTPM2::resetReception() {
   current_packet_.clear();
   receiving_ = false;
 }
-
-} // namespace uart_tpm2
-} // namespace esphome
