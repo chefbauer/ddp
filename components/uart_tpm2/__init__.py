@@ -1,26 +1,19 @@
-from esphome import automation
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import uart
-from esphome.const import CONF_ID, CONF_UART_ID
-
-DEPENDENCIES = ["uart"]
+from esphome.const import CONF_ID
+from esphome.core import coroutine
 
 uart_tpm2_ns = cg.esphome_ns.namespace('uart_tpm2')
-UartTpm2 = uart_tpm2_ns.class_('UartTpm2', cg.Component, uart.UARTDevice)
+UARTTPM2 = uart_tpm2_ns.class_('UARTTPM2', cg.Component, uart.UARTDevice)
 
 CONFIG_SCHEMA = cv.Schema({
-    cv.GenerateID(): cv.declare_id(UartTpm2),
-    cv.GenerateID(CONF_UART_ID): cv.use_id(uart.UARTComponent),
-    cv.Optional('variable_id'): cv.use_id(cg.global_ns.namespace('std').template('array').template('array').template('unsigned char').template('512').template('3')),
-}).extend(cv.COMPONENT_SCHEMA)
+    cv.GenerateID(): cv.declare_id(UARTTPM2),
+    cv.Required(uart.CONF_UART_ID): cv.use_id(uart.UARTComponent),
+})
 
-async def to_code(config):
+@coroutine
+def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
-    await cg.register_component(var, config)
-    await uart.register_uart_device(var, config[CONF_UART_ID])
-
-    if 'variable_id' in config:
-        cg.add(var.set_it_bg(config['variable_id']))
-
-    cg.add(var.set_it_bg(cg.RawExpression('new unsigned char[512][3]()')))
+    yield cg.register_component(var, config)
+    yield uart.register_uart_device(var, config)

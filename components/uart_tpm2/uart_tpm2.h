@@ -1,18 +1,24 @@
 #pragma once
 
 #include "esphome.h"
+#include <vector>
 
 namespace esphome {
 namespace uart_tpm2 {
 
-class UartTpm2 : public Component, public uart::UARTDevice {
-public:
-    void setup() override;
-    void loop() override;
-    void set_it_bg(unsigned char (*it_bg)[3]) { this->it_bg = it_bg; }
+class UARTTPM2 : public Component, public uart::UARTDevice {
+ public:
+  UARTTPM2(uart::UARTComponent *parent) : UARTDevice(parent) {}
+  void setup() override;
+  void loop() override;
 
-protected:
-    unsigned char (*it_bg)[3] = nullptr;
+ private:
+  std::vector<char> current_packet_;
+  bool receiving_ = false;
+  static const int max_packet_size_ = 512 * 3; // 3 bytes per color (RGB)
+
+  void processTPM2Packet(const std::vector<char>& packet);
+  void resetReception();
 };
 
 } // namespace uart_tpm2
