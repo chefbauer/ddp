@@ -16,7 +16,7 @@ void UARTTPM2::loop() {
       if (current_packet_.size() >= 4) { // Mindestens Header + Paketgröße
         if (current_packet_[0] == 0xC9 && current_packet_[1] == 0xDA) {
           uint16_t packet_size = (current_packet_[2] << 8) | current_packet_[3];
-          if (current_packet_.size() == packet_size * 3 + 6) { // Gesamtpaketgröße (Header + Daten + Endbyte)
+          if (current_packet_.size() == packet_size * 3 + 5) { // Gesamtpaketgröße (Header + Daten + Endbyte) 5 ned 6, daten sind extra!
             if (c == 0x36) { // Endbyte
               receiving_ = false;
               processTPM2Packet(std::vector<char>(current_packet_.begin() + 4, current_packet_.end() - 1));
@@ -36,6 +36,7 @@ void UARTTPM2::loop() {
       current_packet_.push_back(c);
     } else {
       // Unerwartetes Zeichen vor Startbytes
+      ESP_LOGW("uart_tpm2", "Unexpected character before start of packet: %c", c);
       current_packet_.clear();
     }
   }
