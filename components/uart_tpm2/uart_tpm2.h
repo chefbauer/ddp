@@ -12,8 +12,8 @@ class UARTTPM2 : public Component, public uart::UARTDevice {
   UARTTPM2() : UARTDevice(nullptr) {}
   void setup() override;
   void loop() override;
-#  static unsigned char it_bg[450][3]; // Interne öffentliche Variable
-  Color it_bg[450][3]; // Interne öffentliche Variable
+//  static unsigned char it_bg[450][3]; // Interne öffentliche Variable
+  static Color it_bg[450][3]; // Interne öffentliche Variable
 
  private:
   std::vector<char> current_packet_;
