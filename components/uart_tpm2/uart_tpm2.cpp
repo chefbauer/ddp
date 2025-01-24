@@ -26,7 +26,7 @@ void UARTTPM2::loop()
         buffer_used = available();
 
         if (buffer_used > (max_buffer_size / 2)) {
-            ESP_LOGW("uart_tpm2", "UART Puffer zu stark belegt: %zu/%zu Bytes", buffer_used, max_buffer_size);
+            //ESP_LOGW("uart_tpm2", "UART Puffer zu stark belegt: %zu/%zu Bytes", buffer_used, max_buffer_size);
         }
 
         char c = read();
@@ -127,7 +127,7 @@ void UARTTPM2::loop()
         if (buffer_used < (max_buffer_size / 4)) // Unter 25% belegt
         {
             buffer_critical = false;
-            ESP_LOGI("uart_tpm2", "UART Puffer normalisiert: %zu/%zu Bytes", buffer_used, max_buffer_size);
+            //ESP_LOGI("uart_tpm2", "UART Puffer normalisiert: %zu/%zu Bytes", buffer_used, max_buffer_size);
         }
     }
 
@@ -153,7 +153,7 @@ void UARTTPM2::processTPM2Packet(const std::vector<char>& packet)
         }
     }
     memcpy(it_bg, it_intern_, sizeof(Color) * 450); // memcpy wird verwendet, da es in der Regel schneller ist
-    ESP_LOGD("uart_tpm2", "Processed %d colors", data_index / 3);
+    //ESP_LOGD("uart_tpm2", "Processed %d colors", data_index / 3);
 }
 
 void UARTTPM2::resetReception() 
