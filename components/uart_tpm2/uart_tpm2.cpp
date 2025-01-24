@@ -52,21 +52,11 @@ void UARTTPM2::processTPM2Packet(const std::vector<char>& packet) {
   for (int i = 0; i < std::min((int)packet.size() / 3, 512); ++i) {
     if (data_index + 2 < packet.size()) {
       // Jede Farbe wird durch 3 aufeinanderfolgende Bytes (RGB) repräsentiert
-      it_bg_[i].r = packet[data_index];
-      it_bg_[i].g = packet[data_index + 1];
-      it_bg_[i].b = packet[data_index + 2];
+      bg_id->value[i].r = packet[data_index];
+      bg_id->value[i].g = packet[data_index + 1];
+      bg_id->value[i].b = packet[data_index + 2];
       data_index += 3;
     }
   }
 
-  // Beispiel: Ausgabe der Anzahl der empfangenen Farben für Debugging
-  ESP_LOGD("uart_tpm2", "Processed %d colors", data_index / 3);
-}
-
-void UARTTPM2::resetReception() {
-  current_packet_.clear();
-  receiving_ = false;
-}
-
-}  // namespace uart_tpm2
-}  // namespace esphome
+  // Beispiel: Ausgabe
