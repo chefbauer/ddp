@@ -1,9 +1,8 @@
 #pragma once
 
 #include "esphome.h"
+#include "esphome/components/light/addressable_light.h"  // Hier wird Color definiert
 #include <vector>
-//#include "esphome/components/light/addressable_light.h"  // Hier wird Color definiert
-#include "esphome/core/color.h"
 
 namespace esphome {
 namespace uart_tpm2 {
