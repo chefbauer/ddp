@@ -1,5 +1,8 @@
 #include "uart_tpm2.h"
 
+namespace esphome {
+namespace uart_tpm2 {
+
 void UARTTPM2::setup() {
   // Annahme: Der UART ist in der YAML-Konfiguration bereits initialisiert
   start();                // Starte den Stream beim Setup
@@ -64,3 +67,6 @@ void UARTTPM2::resetReception() {
   current_packet_.clear();
   receiving_ = false;
 }
+
+}  // namespace uart_tpm2
+}  // namespace esphome

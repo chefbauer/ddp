@@ -3,7 +3,8 @@
 #include "esphome.h"
 #include <vector>
 
-using namespace esphome;
+namespace esphome {
+namespace uart_tpm2 {
 
 class UARTTPM2 : public Component, public uart::UARTDevice {
  public:
@@ -22,3 +23,6 @@ class UARTTPM2 : public Component, public uart::UARTDevice {
   void processTPM2Packet(const std::vector<char>& packet);
   void resetReception();
 };
+
+}  // namespace uart_tpm2
+}  // namespace esphome
