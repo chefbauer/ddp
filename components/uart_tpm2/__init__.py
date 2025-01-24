@@ -9,11 +9,10 @@ UARTTPM2 = uart_tpm2_ns.class_('UARTTPM2', cg.Component, uart.UARTDevice)
 
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(UARTTPM2),
-    cv.Required(uart.CONF_UART_ID): cv.use_id(uart.UARTComponent),
 })
 
 @coroutine
-def to_code(config):
+async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
-    yield cg.register_component(var, config)
-    yield uart.register_uart_device(var, config)
+    await cg.register_component(var, config)
+    # Die UART-Komponente wird automatisch auf die Standard-UART gesetzt, wie bei Adalight
