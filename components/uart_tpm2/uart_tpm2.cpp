@@ -105,7 +105,6 @@ void UARTTPM2::loop()
             {
                 // Wir haben weniger als 4 Bytes, wir warten weiterhin auf Daten
                 start_time = millis(); // Setze die Startzeit neu
-                return; // Beende die Schleife und warte auf weitere Daten
             }
         } 
         else // Wir sind nicht im Empfangsmodus
