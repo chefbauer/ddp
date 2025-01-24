@@ -1,43 +1,15 @@
-#pragma once
-
-#include "esphome.h"
-#include <vector>
-
-using namespace esphome;
-
-class UARTTPM2 : public Component {
- public:
-  void setup() override;
-  void loop() override;
-  void start() { 
-    Serial.write('O');  // Sende 'O' zum Starten des Streams
-    stopped_ = false;    // Setze Flag, dass wir gestartet sind
-  }
-  void stop() { 
-    Serial.write('o');   // Sende 'o' zum Stoppen des Streams
-    stopped_ = true;     // Setze Flag, dass wir gestoppt sind
-  }
-
- private:
-  std::vector<char> current_packet_;
-  bool receiving_ = false;
-  bool stopped_ = false;  // Flag für den Stopp-Zustand
-  static const int max_packet_size_ = 512 * 3; // 3 bytes per color (RGB)
-
-  void processTPM2Packet(const std::vector<char>& packet);
-  void resetReception();
-};
+#include "uart_tpm2.h"
 
 void UARTTPM2::setup() {
-  Serial.begin(1500000); // Initialisiere UART
+  // Annahme: Der UART ist in der YAML-Konfiguration bereits initialisiert
   start();                // Starte den Stream beim Setup
   resetReception();
 }
 
 void UARTTPM2::loop() {
   if (!stopped_) {  // Nur wenn wir nicht gestoppt sind, verarbeiten wir Daten
-    while (Serial.available() > 0) {
-      char c = Serial.read();
+    while (available() > 0) {
+      char c = read();
       if (receiving_) {
         if (current_packet_.size() < max_packet_size_) {
           if (c == 'E') { // Ende des Datenpakets
@@ -60,6 +32,16 @@ void UARTTPM2::loop() {
       }
     }
   }
+}
+
+void UARTTPM2::start() { 
+  write('O');  // Sende 'O' zum Starten des Streams
+  stopped_ = false;    // Setze Flag, dass wir gestartet sind
+}
+
+void UARTTPM2::stop() { 
+  write('o');   // Sende 'o' zum Stoppen des Streams
+  stopped_ = true;     // Setze Flag, dass wir gestoppt sind
 }
 
 void UARTTPM2::processTPM2Packet(const std::vector<char>& packet) {

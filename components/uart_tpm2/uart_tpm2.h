@@ -5,8 +5,9 @@
 
 using namespace esphome;
 
-class UARTTPM2 : public Component {
+class UARTTPM2 : public Component, public uart::UARTDevice {
  public:
+  UARTTPM2(uart::UARTComponent *parent) : UARTDevice(parent) {}
   void setup() override;
   void loop() override;
   void start();
