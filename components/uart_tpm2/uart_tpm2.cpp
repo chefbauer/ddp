@@ -75,7 +75,7 @@ void UARTTPM2::processTPM2Packet(const std::vector<char>& packet)
     // Kopiere die Daten von der internen Variable in die öffentliche Variable
     memcpy(it_bg, it_intern_, sizeof(Color) * 450); // memcpy wird verwendet, da es in der Regel schneller ist
     // Logge die Anzahl der verarbeiteten Farben
-    ESP_LOGD("uart_tpm2", "Korrekt empfangen und gespeichert: %d LEDs", data_index / 3);
+    //ESP_LOGD("uart_tpm2", "Korrekt empfangen und gespeichert: %d LEDs", data_index / 3);
 }
 
 void UARTTPM2::resetReception() 
@@ -87,7 +87,7 @@ void UARTTPM2::resetReception()
 // Neue public Funktion
 void UARTTPM2::get_one_tpm2_package() {
     write(0x4C); // Sende das Zeichen 0x4C per UART
-    ESP_LOGI("uart_tpm2", "Gesendet: 0x4C");
+    //ESP_LOGI("uart_tpm2", "Gesendet: 0x4C");
 }
 
 }  // namespace uart_tpm2
