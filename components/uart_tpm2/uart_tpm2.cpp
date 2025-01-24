@@ -71,7 +71,7 @@ void UARTTPM2::loop()
                                     current_packet_.push_back(next_byte);
                                     receiving_ = true;
                                 }
-                                return; // Beende die Schleife
+                                // Kein return hier, da wir möglicherweise mehr Daten lesen müssen
                             }
                         }
                     }
@@ -79,7 +79,6 @@ void UARTTPM2::loop()
                     {
                         // Paket ist noch nicht vollständig, warten wir
                         start_time = millis(); // Setze die Startzeit neu
-                        return; // Beende die Schleife und warte auf weitere Daten
                     }
                 } 
                 else 
