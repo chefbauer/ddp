@@ -1,5 +1,8 @@
 #include "uart_tpm2.h"
 
+namespace esphome {
+namespace uart_tpm2 {
+
 void UARTTPM2::setup() {
   // Starte den Stream, falls nötig
   resetReception();
@@ -50,3 +53,6 @@ void UARTTPM2::resetReception() {
   current_packet_.clear();
   receiving_ = false;
 }
+
+}  // namespace uart_tpm2
+}  // namespace esphome
