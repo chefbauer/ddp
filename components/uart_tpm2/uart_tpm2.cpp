@@ -14,7 +14,10 @@ void UARTTPM2::loop() {
     if (receiving_) {
       current_packet_.push_back(c);
       if (current_packet_.size() >= 4) { // Mindestens Header + Paketgröße
-        if (current_packet_[0] == 0xC9 && current_packet_[1] == 0xDA) {
+        if (current_packet_[0] == 0xC9 && current_packet_[1] == 0xDA) 
+        {
+          ESP_LOGW("uart_tpm2", "Starte TPM2 Empfang");
+
           uint16_t packet_size = (current_packet_[2] << 8) | current_packet_[3];
           if (current_packet_.size() == packet_size * 3 + 5) { // Gesamtpaketgröße (Header + Daten + Endbyte) 5 ned 6, daten sind extra!
             if (c == 0x36) { // Endbyte
@@ -25,6 +28,7 @@ void UARTTPM2::loop() {
         }
         else {
           // Paket ist ungültig, reset und warte auf neuen Start
+          ESP_LOGW("uart_tpm2", "Paket ist ungültig, reset und warte auf neuen Start");
           resetReception();
         }
       }
