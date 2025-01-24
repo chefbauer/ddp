@@ -155,7 +155,7 @@ void UARTTPM2::log_frame_stats() {
     size_t buffer_used = available();
     float buffer_fill_percent = (static_cast<float>(buffer_used) / max_buffer_size) * 100.0;
     
-    //ESP_LOGI("uart_tpm2", "Frames pro Sekunde: %.2f, Verworfen: %d, Pufferfüllstand: %.2f%%", fps, frames_dropped_, buffer_fill_percent);
+    ESP_LOGI("uart_tpm2", "Frames pro Sekunde: %.2f, Verworfen: %d, Pufferfüllstand: %.2f%%", fps, frames_dropped_, buffer_fill_percent);
 }
 
 void UARTTPM2::get_one_tpm2_package() {
