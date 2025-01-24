@@ -79,7 +79,6 @@ void UARTTPM2::loop()
                     {
                         // Paket ist noch nicht vollständig, warten wir
                         start_time = millis(); // Setze die Startzeit neu
-                        return; // Beende die Schleife und warte auf weitere Daten
                     }
                 } 
                 else 
