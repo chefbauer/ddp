@@ -4,15 +4,17 @@ namespace esphome {
 namespace uart_tpm2 {
 
 void UARTTPM2::setup() {
-  // Annahme: Der UART ist in der YAML-Konfiguration bereits initialisiert
+  if (uart_ != nullptr) {
+    uart_->begin(921600); // Default-Baudrate, kann in YAML angepasst werden
+  }
   start();                // Starte den Stream beim Setup
   resetReception();
 }
 
 void UARTTPM2::loop() {
-  if (!stopped_) {  // Nur wenn wir nicht gestoppt sind, verarbeiten wir Daten
-    while (available() > 0) {
-      char c = read();
+  if (!stopped_ && uart_ != nullptr) {  
+    while (uart_->available() > 0) {
+      char c = uart_->read();
       if (receiving_) {
         if (current_packet_.size() < max_packet_size_) {
           if (c == 'E') { // Ende des Datenpakets
@@ -38,12 +40,16 @@ void UARTTPM2::loop() {
 }
 
 void UARTTPM2::start() { 
-  write('O');  // Sende 'O' zum Starten des Streams
+  if (uart_ != nullptr) {
+    uart_->write('O');  // Sende 'O' zum Starten des Streams
+  }
   stopped_ = false;    // Setze Flag, dass wir gestartet sind
 }
 
 void UARTTPM2::stop() { 
-  write('o');   // Sende 'o' zum Stoppen des Streams
+  if (uart_ != nullptr) {
+    uart_->write('o');   // Sende 'o' zum Stoppen des Streams
+  }
   stopped_ = true;     // Setze Flag, dass wir gestoppt sind
 }
 
