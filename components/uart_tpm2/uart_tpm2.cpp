@@ -21,7 +21,7 @@ void UARTTPM2::loop()
                 if (current_packet_[0] == 0xC9 && current_packet_[1] == 0xDA) 
                 {
                     uint16_t data_size = (current_packet_[2] << 8) | current_packet_[3];
-                    uint16_t expected_size = 2 + 2 + data_size * 3 + 1; // Header(2) + Paketgröße(2) + Daten(data_size*3) + Endbyte(1)
+                    uint16_t expected_size = 2 + 2 + data_size + 1; // Header(2) + Paketgröße(2) + Daten(data_size*3) + Endbyte(1)
                     if (current_packet_.size() == 4) // Nur bei der ersten Überprüfung nach Header
                     {
                         ESP_LOGI("uart_tpm2", "Header und Paketgröße korrekt, Paketgröße: %d", data_size);
