@@ -1,7 +1,7 @@
 #pragma once
 
 #include "esphome.h"
-#include <color.h>
+#include "esphome/core/color.h"
 #include <vector>
 
 namespace esphome {
