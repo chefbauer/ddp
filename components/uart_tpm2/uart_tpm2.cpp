@@ -59,7 +59,7 @@ void UARTTPM2::loop()
             else 
             {
                 // Ungültiger Header, aber wir behalten die Daten, um zu sehen, ob es der Beginn eines neuen Pakets ist
-                ESP_LOGW("uart_tpm2", "Ungültiger Header");
+                ESP_LOGW("uart_tpm2", "Ungültiger Header 0 1: %x %x", current_packet_[0], current_packet_[1]);
                 frames_dropped_++;
                 resetReception(); // Reset und warte auf neues Paket
             }
