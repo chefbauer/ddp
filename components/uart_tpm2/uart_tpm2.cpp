@@ -141,7 +141,7 @@ void UARTTPM2::processTPM2Packet(const std::vector<char>& packet)
         }
     }
     memcpy(it_bg, it_intern_, sizeof(Color) * 450); // memcpy wird verwendet, da es in der Regel schneller ist
-    ESP_LOGD("uart_tpm2", "Processed %d colors", data_index / 3);
+    //ESP_LOGD("uart_tpm2", "Processed %d colors", data_index / 3);
 }
 
 void UARTTPM2::resetReception() 
