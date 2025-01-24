@@ -3,7 +3,7 @@
 namespace esphome {
 namespace uart_tpm2 {
 
-// Hier ist die Definition der statischen Variable erforderlich
+// Definition der statischen Variable
 Color UARTTPM2::it_bg[450];
 
 void UARTTPM2::setup() {
@@ -25,19 +25,15 @@ void UARTTPM2::loop()
                 {
                     uint16_t data_size = (current_packet_[2] << 8) | current_packet_[3];
                     uint16_t expected_size = 2 + 2 + data_size + 1; // Header(2) + Paketgröße(2) + Daten(data_size) + Endbyte(1)
-                    // if (current_packet_.size() == 4) // Nur bei der ersten Überprüfung nach Header
-                    // {
-                    //     ESP_LOGI("uart_tpm2", "Header und Paketgröße korrekt, Farbinformationen: %d", data_size);
-                    // }
+                    //ESP_LOGI("uart_tpm2", "Header und Paketgröße korrekt, Farbinformationen: %d", data_size);
                     if (current_packet_.size() == expected_size) // Paket vollständig
                     {
                         if (c == 0x36) // Endbyte
                         {
                             receiving_ = false;
-                            ESP_LOGI("uart_tpm2", "Korrekt empfangen: %d Farben", data_size);
+                            //ESP_LOGI("uart_tpm2", "Korrekt empfangen: %d Farben", data_size);
                             processTPM2Packet(std::vector<char>(current_packet_.begin() + 4, current_packet_.end() - 1));
-                            // Gibt die Kontrolle an den Scheduler zurück
-                            yield();
+                            yield(); // Gibt die Kontrolle an den Scheduler zurück
                         }
                         resetReception(); // Paket verarbeitet oder ungültig
                         return; // Beende die Schleife, um ESPHome einen Durchlauf zu ermöglichen
@@ -65,24 +61,32 @@ void UARTTPM2::loop()
     }
 }
 
-void UARTTPM2::processTPM2Packet(const std::vector<char>& packet) {
-  int data_index = 0;
-  for (int i = 0; i < std::min((int)packet.size() / 3, 450); ++i) {
-    if (data_index + 2 < packet.size()) {
-      // Speichere die empfangenen Farbdaten in die interne Variable
-      it_bg[i][0] = packet[data_index];
-      it_bg[i][1] = packet[data_index + 1];
-      it_bg[i][2] = packet[data_index + 2];
-      data_index += 3;
+void UARTTPM2::processTPM2Packet(const std::vector<char>& packet) 
+{
+    int data_index = 0;
+    for (int i = 0; i < std::min((int)packet.size() / 3, 450); ++i) {
+        if (data_index + 2 < packet.size()) {
+            // Speichere die empfangenen Farbdaten in die interne Variable
+            it_bg[i].r = packet[data_index];
+            it_bg[i].g = packet[data_index + 1];
+            it_bg[i].b = packet[data_index + 2];
+            data_index += 3;
+        }
     }
-  }
-  // Logge die Anzahl der verarbeiteten Farben
-  //ESP_LOGD("uart_tpm2", "Processed %d colors", data_index / 3);
+    // Logge die Anzahl der verarbeiteten Farben
+    //ESP_LOGD("uart_tpm2", "Processed %d colors", data_index / 3);
 }
 
-void UARTTPM2::resetReception() {
-  current_packet_.clear();
-  receiving_ = false;
+void UARTTPM2::resetReception() 
+{
+    current_packet_.clear();
+    receiving_ = false;
+}
+
+// Neue public Funktion
+void UARTTPM2::get_one_tpm2_package() {
+    write(0x4C); // Sende das Zeichen 0x4C per UART
+    ESP_LOGI("uart_tpm2", "Gesendet: 0x4C");
 }
 
 }  // namespace uart_tpm2

@@ -11,6 +11,7 @@ class UARTTPM2 : public Component, public uart::UARTDevice {
   UARTTPM2() : UARTDevice(nullptr) {}
   void setup() override;
   void loop() override;
+  void get_one_tpm2_package();
   static Color it_bg[450]; // Interne öffentliche Variable
 
  private:
