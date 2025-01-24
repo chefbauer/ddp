@@ -51,10 +51,10 @@ void UARTTPM2::processTPM2Packet(const std::vector<char>& packet) {
   int data_index = 0;
   for (int i = 0; i < std::min((int)packet.size() / 3, 512); ++i) {
     if (data_index + 2 < packet.size()) {
-      // Annahme: Jede Farbe wird durch 3 aufeinanderfolgende Bytes (RGB) repräsentiert
-      id(it_bg)[i].r = packet[data_index];
-      id(it_bg)[i].g = packet[data_index + 1];
-      id(it_bg)[i].b = packet[data_index + 2];
+      // Jede Farbe wird durch 3 aufeinanderfolgende Bytes (RGB) repräsentiert
+      it_bg_[i].r = packet[data_index];
+      it_bg_[i].g = packet[data_index + 1];
+      it_bg_[i].b = packet[data_index + 2];
       data_index += 3;
     }
   }
