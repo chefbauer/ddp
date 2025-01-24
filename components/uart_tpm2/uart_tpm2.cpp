@@ -33,7 +33,6 @@ void UARTTPM2::loop()
                             receiving_ = false;
                             //ESP_LOGI("uart_tpm2", "Korrekt empfangen: %d Farben", data_size);
                             processTPM2Packet(std::vector<char>(current_packet_.begin() + 4, current_packet_.end() - 1));
-                            yield(); // Gibt die Kontrolle an den Scheduler zurück
                         }
                         resetReception(); // Paket verarbeitet oder ungültig
                         return; // Beende die Schleife, um ESPHome einen Durchlauf zu ermöglichen
@@ -67,14 +66,16 @@ void UARTTPM2::processTPM2Packet(const std::vector<char>& packet)
     for (int i = 0; i < std::min((int)packet.size() / 3, 450); ++i) {
         if (data_index + 2 < packet.size()) {
             // Speichere die empfangenen Farbdaten in die interne Variable
-            it_bg[i].r = packet[data_index];
-            it_bg[i].g = packet[data_index + 1];
-            it_bg[i].b = packet[data_index + 2];
+            it_intern_[i].r = packet[data_index];
+            it_intern_[i].g = packet[data_index + 1];
+            it_intern_[i].b = packet[data_index + 2];
             data_index += 3;
         }
     }
+    // Kopiere die Daten von der internen Variable in die öffentliche Variable
+    memcpy(it_bg, it_intern_, sizeof(Color) * 450); // memcpy wird verwendet, da es in der Regel schneller ist
     // Logge die Anzahl der verarbeiteten Farben
-    //ESP_LOGD("uart_tpm2", "Processed %d colors", data_index / 3);
+    ESP_LOGD("uart_tpm2", "Processed %d colors", data_index / 3);
 }
 
 void UARTTPM2::resetReception() 
