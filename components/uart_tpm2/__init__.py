@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import uart
-from esphome.const import CONF_ID
+from esphome.const import CONF_ID, CONF_NAME, CONF_UART_ID
 from esphome.core import coroutine
 
 uart_tpm2_ns = cg.esphome_ns.namespace('uart_tpm2')
