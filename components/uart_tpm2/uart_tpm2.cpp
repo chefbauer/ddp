@@ -12,24 +12,31 @@ void UARTTPM2::loop() {
   while (available()) {
     char c = read();
     if (receiving_) {
-      if (current_packet_.size() < max_packet_size_) {
-        if (c == 'E') { // Ende des Datenpakets
-          receiving_ = false;
-          processTPM2Packet(current_packet_);
-        } else {
-          current_packet_.push_back(c);
+      current_packet_.push_back(c);
+      if (current_packet_.size() >= 4) { // Mindestens Header + Paketgröße
+        if (current_packet_[0] == 0xC9 && current_packet_[1] == 0xDA) {
+          uint16_t packet_size = (current_packet_[2] << 8) | current_packet_[3];
+          if (current_packet_.size() == packet_size * 3 + 6) { // Gesamtpaketgröße (Header + Daten + Endbyte)
+            if (c == 0x36) { // Endbyte
+              receiving_ = false;
+              processTPM2Packet(std::vector<char>(current_packet_.begin() + 4, current_packet_.end() - 1));
+            }
+          }
         }
-      } else {
-        // Pufferüberlauf
-        ESP_LOGE("uart_tpm2", "Packet size exceeded max size, resetting");
-        resetReception();
+        else {
+          // Paket ist ungültig, reset und warte auf neuen Start
+          resetReception();
+        }
       }
-    } else if (c == 'D') { // Start des Datenpakets
-      resetReception();
+    } else if (c == 0xC9) { // Startbyte 1
+      current_packet_.clear();
+      current_packet_.push_back(c);
       receiving_ = true;
+    } else if (current_packet_.size() == 1 && c == 0xDA) { // Startbyte 2 nach 0xC9
+      current_packet_.push_back(c);
     } else {
-      // Unerwartetes Zeichen vor 'D'
-      ESP_LOGW("uart_tpm2", "Unexpected character before start of packet: %c", c);
+      // Unerwartetes Zeichen vor Startbytes
+      current_packet_.clear();
     }
   }
 }
