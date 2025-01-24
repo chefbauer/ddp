@@ -164,7 +164,11 @@ void UARTTPM2::resetReception()
 
 void UARTTPM2::log_frame_stats() {
     float fps = frames_processed_ / 5.0; // 5 Sekunden, daher teilen wir durch 5
-    ESP_LOGI("uart_tpm2", "Frames pro Sekunde: %.2f, Verworfen: %d", fps, frames_dropped_);
+    const size_t max_buffer_size = 16384; // 16KB = 16384 Bytes
+    size_t buffer_used = available();
+    float buffer_fill_percent = (static_cast<float>(buffer_used) / max_buffer_size) * 100.0;
+    
+    ESP_LOGI("uart_tpm2", "Frames pro Sekunde: %.2f, Verworfen: %d, Pufferfüllstand: %.2f%%", fps, frames_dropped_, buffer_fill_percent);
 }
 
 void UARTTPM2::get_one_tpm2_package() {
