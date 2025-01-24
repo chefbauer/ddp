@@ -118,14 +118,6 @@ void UARTTPM2::loop()
         }
     }
 
-    // Logge die Statistik alle 5 Sekunden
-    uint32_t now = millis();
-    if (now - last_log_time_ >= 5000) {
-        log_frame_stats();
-        last_log_time_ = now;
-        frames_processed_ = 0; // Zurücksetzen der Frames für die nächste Periode
-        frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
-    }
 }
 
 void UARTTPM2::processTPM2Packet(const std::vector<char>& packet) 
@@ -141,6 +133,18 @@ void UARTTPM2::processTPM2Packet(const std::vector<char>& packet)
     }
     memcpy(it_bg, it_intern_, sizeof(Color) * 450); // memcpy wird verwendet, da es in der Regel schneller ist
     //ESP_LOGD("uart_tpm2", "Processed %d colors", data_index / 3);
+
+    // Logge die Statistik alle 5 Sekunden
+    uint32_t now = millis();
+    if (now - last_log_time_ >= 5000) {
+        log_frame_stats();
+        last_log_time_ = now;
+        frames_processed_ = 0; // Zurücksetzen der Frames für die nächste Periode
+        frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
+    }
+
+
+
 }
 
 void UARTTPM2::resetReception() 
