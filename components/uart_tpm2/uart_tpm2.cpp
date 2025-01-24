@@ -3,6 +3,9 @@
 namespace esphome {
 namespace uart_tpm2 {
 
+// Hier ist die Definition der statischen Variable erforderlich
+Color UARTTPM2::it_bg[450];
+
 void UARTTPM2::setup() {
   // Starte den Stream, falls nötig
   resetReception();
