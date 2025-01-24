@@ -44,6 +44,7 @@ void UARTTPM2::loop()
                         frames_processed_++;
                         processTPM2Packet(std::vector<char>(current_packet_.begin() + 4, current_packet_.end() - 1));
                         resetReception(); // Paket verarbeitet
+                        return;
                     }
                 }
                 else
@@ -52,8 +53,9 @@ void UARTTPM2::loop()
                     ESP_LOGW("uart_tpm2", "Paket unvollständig, Timeout erreicht");
                     frames_dropped_++;
                     resetReception(); // Reset und warte auf neues Paket
+                    return;
                 }
-            } 
+            }
             else 
             {
                 // Ungültiger Header, aber wir behalten die Daten, um zu sehen, ob es der Beginn eines neuen Pakets ist
