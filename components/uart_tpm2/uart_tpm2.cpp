@@ -16,7 +16,7 @@ void UARTTPM2::setup() {
 void UARTTPM2::loop() 
 {
     static uint32_t start_time = 0; // Zeit, wann wir angefangen haben, auf weitere Daten zu warten
-    uint32_t loop_start_time = millis(); // Zeitstempel für den Schleifenbeginn
+    loop_start_time_ = millis(); // Zeitstempel für den Schleifenbeginn
     while (available()) 
     {
         char c = read();
