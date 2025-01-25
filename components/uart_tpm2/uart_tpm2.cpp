@@ -6,7 +6,7 @@ namespace esphome {
 namespace uart_tpm2 {
 
 // Definition der statischen Variable
-unsigned char UARTTPM2::it_bg[450][3];
+unsigned char UARTTPM2::it_bg[1350];
 
 void UARTTPM2::setup() {
   last_log_time_ = millis(); // Starte die Zeitmessung beim Setup
@@ -121,9 +121,9 @@ void UARTTPM2::loop()
 
 void UARTTPM2::processTPM2Packet(const char* packet, int size) 
 {
-    size_t bytes_to_copy = std::min(size, 450 * 3);
+    size_t bytes_to_copy = std::min(size, 1350);
     memcpy(it_intern_, packet, bytes_to_copy);
-    memcpy(it_bg, it_intern_, sizeof(it_intern_)); // memcpy wird verwendet, da es in der Regel schneller ist
+    memcpy(it_bg, it_intern_, bytes_to_copy); 
     //ESP_LOGD("uart_tpm2", "Processed %d colors", bytes_to_copy / 3);
 
     // Logge die Statistik alle 5 Sekunden
@@ -153,7 +153,7 @@ void UARTTPM2::log_frame_stats() {
 
 void UARTTPM2::get_one_tpm2_package() {
     write(0x4C); // Sende das Zeichen 0x4C per UART
-    //ESP_LOGI("uart_tpm2", "Gesendet: 0x4C");
+    ESP_LOGI("uart_tpm2", "Gesendet: 0x4C");
 }
 
 }  // namespace uart_tpm2
