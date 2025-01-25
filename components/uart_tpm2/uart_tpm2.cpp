@@ -10,8 +10,9 @@ uint32_t millis() {
 
 namespace esphome {
 namespace uart_tpm2 {
- 
-FIFOBuffer UARTTPM2::fifo(32768);  // Initialisierung der statischen Variable, z.B. mit einer Größe von 4KB
+
+
+//FIFOBuffer UARTTPM2::fifo(32768);  // Initialisierung der statischen Variable, z.B. mit einer Größe von 4KB
 
 // Definition der statischen Variable
 unsigned char UARTTPM2::it_bg[1350];
