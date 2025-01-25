@@ -33,7 +33,8 @@ void UARTTPM2::loop()
             if (receiving_) 
             {
                 current_packet_.push_back(c);
-                if (current_packet_.size() >= 4) // Mindestens Header + Paketgröße                {
+                if (current_packet_.size() >= 4) // Mindestens Header + Paketgröße
+                {
                     if (current_packet_[0] == 0xC9 && current_packet_[1] == 0xDA) 
                     {
                         uint16_t data_size = (current_packet_[2] << 8) | current_packet_[3];
