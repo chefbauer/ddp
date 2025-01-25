@@ -250,7 +250,7 @@ void UARTTPM2::loop()
 void UARTTPM2::processTPM2Packet(const unsigned char* packet, int size) 
 {
     memcpy(it_bg, packet, size); // Direkte Kopie der Daten in it_bg
-    //ESP_LOGD("uart_tpm2", "Processed %d colors", size / 3);
+    ESP_LOGD("uart_tpm2", "Processed %d colors", size / 3);
 
     // Logge die Statistik alle 5 Sekunden
     uint32_t now = millis();
