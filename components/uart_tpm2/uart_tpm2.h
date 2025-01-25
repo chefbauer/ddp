@@ -24,7 +24,7 @@ class UARTTPM2 : public Component, public uart::UARTDevice {
   uint32_t frames_processed_ = 0; // Anzahl der verarbeiteten Frames
   uint32_t frames_dropped_ = 0; // Anzahl der verworfenen Frames
 
-  void processTPM2Packet(const std::vector<char>& packet);
+  void processTPM2Packet(const char* packet, int size); // Geänderte Signatur
   void resetReception();
   void log_frame_stats();
 };

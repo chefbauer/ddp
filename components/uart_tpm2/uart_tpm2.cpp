@@ -15,6 +15,10 @@ void UARTTPM2::setup() {
 
 void UARTTPM2::loop() 
 {
+    if (available() < 1200)
+    {
+      return;
+    }
     static uint32_t start_time = 0; // Zeit, wann wir angefangen haben, auf weitere Daten zu warten
 
     while (available()) 
@@ -120,20 +124,11 @@ void UARTTPM2::loop()
     return; // so is nach einem mal schaun fertig bis zum nächsten durchlauf
 }
 
-void UARTTPM2::processTPM2Packet(const std::vector<char>& packet) 
-{
-    int data_index = 0;
-    for (int i = 0; i < std::min((int)packet.size() / 3, 450); ++i) {
-        if (data_index + 2 < packet.size()) {
-            it_intern_[i].r = packet[data_index];
-            it_intern_[i].g = packet[data_index + 1];
-            it_intern_[i].b = packet[data_index + 2];
-            data_index += 3;
-        }
-    }
-    memcpy(it_bg, it_intern_, sizeof(Color) * 450); // memcpy wird verwendet, da es in der Regel schneller ist
-    //ESP_LOGD("uart_tpm2", "Processed %d colors", data_index / 3);
-
+// Direkte Kopie aus dem Puffer ins Array! :)
+void UARTTPM2::processTPM2Packet(const char* packet, int size) {
+    int bytes_to_copy = std::min(size, 450 * 3);
+    memcpy(it_intern_, packet, bytes_to_copy);
+    memcpy(it_bg, it_intern_, sizeof(Color) * 450);
     // Logge die Statistik alle 5 Sekunden
     uint32_t now = millis();
     if (now - last_log_time_ >= 5000) {
@@ -142,8 +137,21 @@ void UARTTPM2::processTPM2Packet(const std::vector<char>& packet)
         frames_processed_ = 0; // Zurücksetzen der Frames für die nächste Periode
         frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
     }
+}
 
-
+// void UARTTPM2::processTPM2Packet(const std::vector<char>& packet) 
+// {
+//     int data_index = 0;
+//     for (int i = 0; i < std::min((int)packet.size() / 3, 450); ++i) {
+//         if (data_index + 2 < packet.size()) {
+//             it_intern_[i].r = packet[data_index];
+//             it_intern_[i].g = packet[data_index + 1];
+//             it_intern_[i].b = packet[data_index + 2];
+//             data_index += 3;
+//         }
+//     }
+//     memcpy(it_bg, it_intern_, sizeof(Color) * 450); // memcpy wird verwendet, da es in der Regel schneller ist
+//     //ESP_LOGD("uart_tpm2", "Processed %d colors", data_index / 3);
 
 }
 
