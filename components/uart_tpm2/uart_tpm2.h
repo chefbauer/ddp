@@ -28,7 +28,7 @@ class UARTTPM2 : public Component, public uart::UARTDevice {
   uint32_t frames_dropped_ = 0; // Anzahl der verworfenen Frames
   
   // FIFO PUFFER
-  static DRAM_ATTR FIFOBuffer fifo;  // Deklaration der statischen Variable
+  static DRAM_ATTR FIFOBuffer fifo;  // Deklaration der statischen Variable DRAM_ATTR = im ram
 
   void processTPM2Packet(const unsigned char* packet, int size); // Geändert zu unsigned char*
   void resetReception();
