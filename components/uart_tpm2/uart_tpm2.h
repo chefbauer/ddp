@@ -9,7 +9,7 @@ namespace uart_tpm2 {
 
 class UARTTPM2 : public Component, public uart::UARTDevice {
  public:
-  UARTTPM2() : UARTDevice(nullptr) {}
+  UARTTPM2() : UARTDevice(nullptr) {} 
   void setup() override;
   void loop() override;
   void get_one_tpm2_package();
