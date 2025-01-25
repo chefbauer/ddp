@@ -23,7 +23,8 @@ void UARTTPM2::setup() {
 FIFOBuffer UARTTPM2::fifo(16384);  // Initialisierung der statischen Variable mit einer Größe von 16KB
 
 
-void UARTTPM2::loop() {
+void UARTTPM2::loop()
+{
     static uint32_t start_time = 0; 
     loop_start_time_ = millis();
 
@@ -35,7 +36,7 @@ void UARTTPM2::loop() {
         bool read_success = read_array(buffer, buffer_size);
         if (read_success) {
             size_t written_bytes = fifo.write(buffer, buffer_size);
-            ESP_LOGD("uart_tpm2", "Geschrieben: %u Bytes", written_bytes);
+            //ESP_LOGD("uart_tpm2", "Geschrieben: %u Bytes", written_bytes);
 
             // Paketverarbeitung
             while (fifo.available() >= 4) { // Mindestens Header + Größe
@@ -80,7 +81,7 @@ void UARTTPM2::loop() {
             }
         }
     }
-
+}
 
 
 
@@ -237,6 +238,7 @@ void UARTTPM2::loop() {
 //         frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
 //     }
 // }
+//}
 
 void UARTTPM2::processTPM2Packet(const unsigned char* packet, int size) 
 {
