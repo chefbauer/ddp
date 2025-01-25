@@ -153,7 +153,7 @@ void UARTTPM2::log_frame_stats() {
 
 void UARTTPM2::get_one_tpm2_package() {
     write(0x4C); // Sende das Zeichen 0x4C per UART
-    ESP_LOGI("uart_tpm2", "Gesendet: 0x4C");
+    //ESP_LOGI("uart_tpm2", "Gesendet: 0x4C");
 }
 
 }  // namespace uart_tpm2
