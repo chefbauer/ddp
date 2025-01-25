@@ -222,11 +222,26 @@ void UARTTPM2::loop() {
 
 // }
 
-void UARTTPM2::processTPM2Packet(const char* packet, int size) 
+// void UARTTPM2::processTPM2Packet(const char* packet, int size) 
+// {
+//     size_t bytes_to_copy = std::min(size, 1350);
+//     memcpy(it_bg, packet, bytes_to_copy); 
+//     //ESP_LOGD("uart_tpm2", "Processed %d colors", bytes_to_copy / 3);
+
+//     // Logge die Statistik alle 5 Sekunden
+//     uint32_t now = millis();
+//     if (now - last_log_time_ >= 5000) {
+//         log_frame_stats();
+//         last_log_time_ = now;
+//         frames_processed_ = 0; // Zurücksetzen der Frames für die nächste Periode
+//         frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
+//     }
+// }
+
+void UARTTPM2::processTPM2Packet(const unsigned char* packet, int size) 
 {
-    size_t bytes_to_copy = std::min(size, 1350);
-    memcpy(it_bg, packet, bytes_to_copy); 
-    //ESP_LOGD("uart_tpm2", "Processed %d colors", bytes_to_copy / 3);
+    memcpy(it_bg, packet, size); // Direkte Kopie der Daten in it_bg
+    //ESP_LOGD("uart_tpm2", "Processed %d colors", size / 3);
 
     // Logge die Statistik alle 5 Sekunden
     uint32_t now = millis();
@@ -237,6 +252,7 @@ void UARTTPM2::processTPM2Packet(const char* packet, int size)
         frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
     }
 }
+
 void UARTTPM2::resetReception() 
 {
     current_packet_.clear();
