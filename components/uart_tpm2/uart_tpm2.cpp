@@ -34,7 +34,7 @@ void UARTTPM2::loop()
         unsigned char buffer[buffer_size]; // Puffer für UART-Daten
         
         // Debug: Logge die gelesenen Bytes
-        ESP_LOGD("uart_tpm2", "buffer_size: %u Bytes", buffer_size);
+        //ESP_LOGD("uart_tpm2", "buffer_size: %u Bytes", buffer_size);
 
         // Lies alle verfügbaren Daten auf einmal in den Buffer
         bool read_success = read_array(buffer, buffer_size);
@@ -55,7 +55,7 @@ void UARTTPM2::loop()
     puffer_size_start_ = fifo.getSize();
     if (puffer_size_start_ < 4000 && puffer_size_start_ > 0)
     {
-      ESP_LOGW("uart_tpm2", "Zu wenig gepuffert: %u Bytes | UART Puffer: %u", puffer_size_start_, available_bytes); 
+      //ESP_LOGW("uart_tpm2", "Zu wenig gepuffert: %u Bytes | UART Puffer: %u", puffer_size_start_, available_bytes); 
       //return;
     }
 
