@@ -33,6 +33,9 @@ void UARTTPM2::loop()
         size_t buffer_size = std::min(static_cast<size_t>(available_bytes), 4096u); // Beispiel: bis zu 1024 Bytes auf einmal
         unsigned char buffer[buffer_size]; // Puffer für UART-Daten
         
+        // Debug: Logge die gelesenen Bytes
+        ESP_LOGD("uart_tpm2", "buffer_size: %u Bytes", buffer_size);
+
         // Lies alle verfügbaren Daten auf einmal in den Buffer
         size_t read_bytes = read_array(buffer, buffer_size);
 
