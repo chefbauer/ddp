@@ -30,6 +30,11 @@ void UARTTPM2::loop()
                     uint16_t data_size = (current_packet_[2] << 8) | current_packet_[3];
                     uint16_t expected_size = 2 + 2 + data_size + 1; // Header(2) + Paketgröße(2) + Daten(data_size) + Endbyte(1)
                     
+                    if (available() < data_size)
+                    {
+                      return;
+                    }
+
                     if (current_packet_.size() >= expected_size) // Paket vollständig oder mehr Daten verfügbar
                     {
                         if (current_packet_.back() == 0x36) // Endbyte
@@ -79,7 +84,7 @@ void UARTTPM2::loop()
                         // Paket ist noch nicht vollständig, warten wir
                         if (millis() - loop_start_time >= 4) // 4ms Timeout für die Schleife
                         {
-                            return; // Abbrechen und beim nächsten Durchlauf fortsetzen
+                            //return; // Abbrechen und beim nächsten Durchlauf fortsetzen
                         }
                     }
                 } 
