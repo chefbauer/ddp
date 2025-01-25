@@ -122,8 +122,7 @@ void UARTTPM2::loop()
 void UARTTPM2::processTPM2Packet(const char* packet, int size) 
 {
     size_t bytes_to_copy = std::min(size, 1350);
-    memcpy(it_intern_, packet, bytes_to_copy);
-    memcpy(it_bg, it_intern_, bytes_to_copy); 
+    memcpy(it_bg, packet, bytes_to_copy); 
     //ESP_LOGD("uart_tpm2", "Processed %d colors", bytes_to_copy / 3);
 
     // Logge die Statistik alle 5 Sekunden
@@ -135,7 +134,6 @@ void UARTTPM2::processTPM2Packet(const char* packet, int size)
         frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
     }
 }
-
 void UARTTPM2::resetReception() 
 {
     current_packet_.clear();
@@ -153,7 +151,7 @@ void UARTTPM2::log_frame_stats() {
 
 void UARTTPM2::get_one_tpm2_package() {
     write(0x4C); // Sende das Zeichen 0x4C per UART
-    ESP_LOGI("uart_tpm2", "Gesendet: 0x4C");
+    //ESP_LOGI("uart_tpm2", "Gesendet: 0x4C");
 }
 
 }  // namespace uart_tpm2
