@@ -110,6 +110,10 @@ void UARTTPM2::loop()
     static uint32_t start_time = 0; // Zeit, wann wir angefangen haben, auf weitere Daten zu warten
     loop_start_time_ = millis(); // Zeitstempel für den Schleifenbeginn
 
+    if (auto_mode_enabled_flag_ && loop_start_time_ - last_package_processed_ >= 500)
+    {
+        get_one_tpm2_package(); // startet bzw. alle 1/2 sekunden ein Paket wenn nichts mehr kommt.
+    }
     int available_bytes = available();
     if (available_bytes > 0) {
         // Puffergröße bestimmen und sicherstellen, dass wir nicht mehr lesen, als wir Puffer haben
@@ -179,6 +183,10 @@ void UARTTPM2::loop()
                                 last_log_time_ = now;
                                 frames_processed_ = 0; // Zurücksetzen der Frames für die nächste Periode
                                 frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
+                            }
+                            if (auto_mode_enabled_flag_)
+                            {
+                              get_one_tpm2_package(); // nur ein Ping :)
                             }
                             return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
                         }
@@ -303,9 +311,19 @@ void UARTTPM2::log_frame_stats() {
     ESP_LOGI("uart_tpm2", "Frames pro Sekunde: %.2f, Verworfen: %d, Puffer %%: %.2f%% | Zeit ms: %d | Pkt. Start: %d", fps, frames_dropped_, buffer_fill_percent, millis() - loop_start_time_, puffer_size_start_);
 }
 
-void UARTTPM2::get_one_tpm2_package() {
+void UARTTPM2::get_one_tpm2_package() 
+{
     write(0x4C); // Sende das Zeichen 0x4C per UART
     //ESP_LOGI("uart_tpm2", "Gesendet: 0x4C");
+}
+void UARTTPM2::auto_mode_enable(int auto_mode_fps_target)
+{
+  auto_mode_fps_target_ = auto_mode_fps_target; // noch nicht implementiert
+  auto_mode_enabled_flag_ = true;
+}
+void UARTTPM2::auto_mode_disable() {
+  auto_mode_fps_target_ = 0;
+  auto_mode_enabled_flag_ = false;
 }
 
 }  // namespace uart_tpm2
