@@ -2,6 +2,7 @@
 #include "fifo_buffer.h"
 #include <cstring> // Für memcpy
 //#include <Arduino.h> // Für millis()
+#include <cstddef>
 
 #include "esp_timer.h"
 uint32_t millis() {
