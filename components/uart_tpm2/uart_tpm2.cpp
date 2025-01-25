@@ -15,10 +15,6 @@ void UARTTPM2::setup() {
 
 void UARTTPM2::loop() 
 {
-    if (available() < 1200)
-    {
-      return;
-    }
     static uint32_t start_time = 0; // Zeit, wann wir angefangen haben, auf weitere Daten zu warten
 
     while (available()) 
@@ -41,7 +37,8 @@ void UARTTPM2::loop()
                         {
                             receiving_ = false;
                             frames_processed_++;
-                            processTPM2Packet(std::vector<char>(current_packet_.begin() + 4, current_packet_.end() - 1));
+                            // Hier wird die neue Signatur verwendet
+                            processTPM2Packet(current_packet_.data() + 4, data_size); // Skip 4 bytes (Header + Size)
                             resetReception(); // Paket verarbeitet
                             return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
                         }
@@ -54,7 +51,8 @@ void UARTTPM2::loop()
                             {
                                 receiving_ = false;
                                 frames_processed_++;
-                                processTPM2Packet(std::vector<char>(current_packet_.begin() + 4, current_packet_.end()));
+                                // Hier wird die neue Signatur verwendet
+                                processTPM2Packet(current_packet_.data() + 4, data_size);
                                 resetReception(); // Paket verarbeitet
                                 // Start a new packet with the extra byte
                                 if (next_byte == 0xC9) 
@@ -121,7 +119,6 @@ void UARTTPM2::loop()
             // Andere Zeichen ignorieren, bis wir 0xC9 sehen
         }
     }
-    return; // so is nach einem mal schaun fertig bis zum nächsten durchlauf
 }
 
 // Direkte Kopie aus dem Puffer ins Array! :)
@@ -129,6 +126,7 @@ void UARTTPM2::processTPM2Packet(const char* packet, int size) {
     int bytes_to_copy = std::min(size, 450 * 3);
     memcpy(it_intern_, packet, bytes_to_copy);
     memcpy(it_bg, it_intern_, sizeof(Color) * 450);
+
     // Logge die Statistik alle 5 Sekunden
     uint32_t now = millis();
     if (now - last_log_time_ >= 5000) {
