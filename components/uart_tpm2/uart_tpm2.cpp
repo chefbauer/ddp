@@ -56,7 +56,7 @@ void UARTTPM2::loop()
     //     char c = read();
     // // Verarbeite Daten aus dem FIFO-Puffer, wenn verfügbar
     while (fifo.available()) {
-        unsigned c byte = fifo.read();
+        unsigned char c = fifo.read();
     
         if (receiving_) 
         {
