@@ -47,6 +47,7 @@ void UARTTPM2::loop()
     puffer_size_start_ = fifo.getSize();
     if (puffer_size_start_ < 4000)
     {
+      ESP_LOGW("uart_tpm2", "Zu wenig gepuffert: %u Bytes | UART Puffer: %u", puffer_size_start_, available_bytes); 
       //return;
     }
 
