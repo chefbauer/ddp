@@ -110,7 +110,7 @@ void UARTTPM2::loop()
     loop_start_time_ = millis(); // Zeitstempel für den Schleifenbeginn
 
     int available_bytes = available();
-    if (available_bytes > 0) {
+    if (available_bytes > 1500) {
         // Puffergröße bestimmen und sicherstellen, dass wir nicht mehr lesen, als wir Puffer haben
         size_t buffer_size = std::min(static_cast<size_t>(available_bytes), 8192u); // Beispiel: bis zu 1024 Bytes auf einmal
         unsigned char buffer[buffer_size]; // Puffer für UART-Daten
@@ -135,12 +135,12 @@ void UARTTPM2::loop()
         }
     }
 
-    puffer_size_start_ = fifo.getSize();
-    if (puffer_size_start_ < 2000 && puffer_size_start_ > 0)
-    {
-      //ESP_LOGW("uart_tpm2", "Zu wenig gepuffert: %u Bytes | UART Puffer: %u", puffer_size_start_, available_bytes); 
-      return;
-    }
+    // puffer_size_start_ = fifo.getSize();
+    // if (puffer_size_start_ < 2000 && puffer_size_start_ > 0)
+    // {
+    //   //ESP_LOGW("uart_tpm2", "Zu wenig gepuffert: %u Bytes | UART Puffer: %u", puffer_size_start_, available_bytes); 
+    //   return;
+    // }
 
 
     // while (available()) 
