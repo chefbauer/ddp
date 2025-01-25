@@ -2,6 +2,7 @@
 
 #include "esphome.h"
 #include <vector>
+#include <cstddef>
 #include "fifo_buffer.h"
 
 namespace esphome {
