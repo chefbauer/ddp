@@ -25,16 +25,39 @@ void UARTTPM2::loop()
 {
     static uint32_t start_time = 0; // Zeit, wann wir angefangen haben, auf weitere Daten zu warten
     loop_start_time_ = millis(); // Zeitstempel für den Schleifenbeginn
-    puffer_size_start_ = available();
+
+    int available_bytes = available();
+    if (available_bytes > 0) {
+        // Puffergröße bestimmen und sicherstellen, dass wir nicht mehr lesen, als wir Puffer haben
+        size_t buffer_size = std::min(static_cast<size_t>(available_bytes), 1024u); // Beispiel: bis zu 1024 Bytes auf einmal
+        unsigned char buffer[buffer_size]; // Puffer für UART-Daten
+        
+        // Lies alle verfügbaren Daten auf einmal in den Buffer
+        size_t read_bytes = read_array(buffer, buffer_size);
+
+        // Schreibe die gelesenen Daten in den FIFO-Puffer
+        size_t written_bytes = fifo.write(buffer, read_bytes);
+
+        if (written_bytes != read_bytes) {
+            ESP_LOGW("uart_tpm2", "Nicht alle Bytes konnten in den FIFO-Puffer geschrieben werden. Gelesen: %u, Geschrieben: %u", 
+                     read_bytes, written_bytes);
+        }
+    }
+
+    puffer_size_start_ = fifo.getSize();
     if (puffer_size_start_ < 4000)
     {
       return;
     }
 
 
-    while (available()) 
-    {
-        char c = read();
+    // while (available()) 
+    // {
+    //     char c = read();
+    // // Verarbeite Daten aus dem FIFO-Puffer, wenn verfügbar
+    while (fifo.available()) {
+        unsigned c byte = fifo.read();
+    
         if (receiving_) 
         {
             current_packet_.push_back(c);
