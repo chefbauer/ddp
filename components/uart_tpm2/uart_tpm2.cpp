@@ -38,6 +38,13 @@ void UARTTPM2::loop()
             size_t written_bytes = fifo.write(buffer, buffer_size);
             //ESP_LOGD("uart_tpm2", "Geschrieben: %u Bytes", written_bytes);
 
+            puffer_size_start_ = fifo.getSize();
+            if (puffer_size_start_ < 4000 && puffer_size_start_ > 0)
+            {
+              ESP_LOGW("uart_tpm2", "Zu wenig gepuffert: %u Bytes | UART Puffer: %u", puffer_size_start_, available_bytes); 
+              return;
+            }
+
             // Paketverarbeitung
             while (fifo.available() >= 4) { // Mindestens Header + Größe
                 unsigned char header_check[4];
