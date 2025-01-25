@@ -11,7 +11,6 @@
 namespace esphome {
 namespace uart_tpm2 {
 
-FIFOBuffer UARTTPM2::fifo(16384);  // Initialisierung der statischen Variable mit einer Größe von 16KB
 
 // Definition der statischen Variable
 unsigned char UARTTPM2::it_bg[1350];
@@ -21,6 +20,8 @@ void UARTTPM2::setup() {
   resetReception();
 }
 
+FIFOBuffer UARTTPM2::fifo(16384);  // Initialisierung der statischen Variable mit einer Größe von 16KB
+
 void UARTTPM2::loop() 
 {
     static uint32_t start_time = 0; // Zeit, wann wir angefangen haben, auf weitere Daten zu warten
@@ -29,14 +30,19 @@ void UARTTPM2::loop()
     int available_bytes = available();
     if (available_bytes > 0) {
         // Puffergröße bestimmen und sicherstellen, dass wir nicht mehr lesen, als wir Puffer haben
-        size_t buffer_size = std::min(static_cast<size_t>(available_bytes), 1024u); // Beispiel: bis zu 1024 Bytes auf einmal
+        size_t buffer_size = std::min(static_cast<size_t>(available_bytes), 4096u); // Beispiel: bis zu 1024 Bytes auf einmal
         unsigned char buffer[buffer_size]; // Puffer für UART-Daten
         
         // Lies alle verfügbaren Daten auf einmal in den Buffer
         size_t read_bytes = read_array(buffer, buffer_size);
 
-        // Schreibe die gelesenen Daten in den FIFO-Puffer
+        // Debug: Logge die gelesenen Bytes
+        ESP_LOGD("uart_tpm2", "Gelesen: %u Bytes", read_bytes);
+
         size_t written_bytes = fifo.write(buffer, read_bytes);
+
+        // Debug: Logge die geschriebenen Bytes
+        ESP_LOGD("uart_tpm2", "Geschrieben: %u Bytes", written_bytes);
 
         if (written_bytes != read_bytes) {
             ESP_LOGW("uart_tpm2", "Nicht alle Bytes konnten in den FIFO-Puffer geschrieben werden. Gelesen: %u, Geschrieben: %u", 
@@ -45,7 +51,7 @@ void UARTTPM2::loop()
     }
 
     puffer_size_start_ = fifo.getSize();
-    if (puffer_size_start_ < 4000)
+    if (puffer_size_start_ < 4000 && puffer_size_start_ > 0)
     {
       ESP_LOGW("uart_tpm2", "Zu wenig gepuffert: %u Bytes | UART Puffer: %u", puffer_size_start_, available_bytes); 
       //return;
