@@ -1,4 +1,5 @@
 #include "uart_tpm2.h"
+#include "fifo_buffer.h"
 #include <cstring> // Für memcpy
 //#include <Arduino.h> // Für millis()
 
@@ -9,6 +10,8 @@ uint32_t millis() {
 
 namespace esphome {
 namespace uart_tpm2 {
+
+FIFOBuffer UARTTPM2::fifo(32768);  // Initialisierung der statischen Variable, z.B. mit einer Größe von 4KB
 
 // Definition der statischen Variable
 unsigned char UARTTPM2::it_bg[1350];
@@ -23,10 +26,12 @@ void UARTTPM2::loop()
     static uint32_t start_time = 0; // Zeit, wann wir angefangen haben, auf weitere Daten zu warten
     loop_start_time_ = millis(); // Zeitstempel für den Schleifenbeginn
     puffer_size_start_ = available();
-    if (available() < 1500)
+    if (puffer_size_start_ < 4000)
     {
       return;
     }
+
+
     while (available()) 
     {
         char c = read();

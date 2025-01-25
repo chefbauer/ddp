@@ -2,6 +2,7 @@
 
 #include "esphome.h"
 #include <vector>
+#include "fifo_buffer.h"
 
 namespace esphome {
 namespace uart_tpm2 {
@@ -24,6 +25,9 @@ class UARTTPM2 : public Component, public uart::UARTDevice {
   int puffer_size_start_ = 0; // Wieviele Bytes im Puffer
   uint32_t frames_processed_ = 0; // Anzahl der verarbeiteten Frames
   uint32_t frames_dropped_ = 0; // Anzahl der verworfenen Frames
+  
+  // FIFO PUFFER
+  static FIFOBuffer fifo;  // Deklaration der statischen Variable
 
   void processTPM2Packet(const char* packet, int size);
   void resetReception();
