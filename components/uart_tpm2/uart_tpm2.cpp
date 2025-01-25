@@ -17,6 +17,7 @@ void UARTTPM2::loop()
 {
     static uint32_t start_time = 0; // Zeit, wann wir angefangen haben, auf weitere Daten zu warten
     loop_start_time_ = millis(); // Zeitstempel für den Schleifenbeginn
+    puffer_size_start_ = available();
     while (available()) 
     {
         char c = read();
@@ -140,7 +141,7 @@ void UARTTPM2::log_frame_stats() {
     size_t buffer_used = available();
     float buffer_fill_percent = (static_cast<float>(buffer_used) / max_buffer_size) * 100.0;
     
-    ESP_LOGI("uart_tpm2", "Frames pro Sekunde: %.2f, Verworfen: %d, Puffer %%: %.2f%% | Zeit ms: %d", fps, frames_dropped_, buffer_fill_percent, millis() - loop_start_time_);
+    ESP_LOGI("uart_tpm2", "Frames pro Sekunde: %.2f, Verworfen: %d, Puffer %%: %.2f%% | Zeit ms: %d | Pkt. Start: %d", fps, frames_dropped_, buffer_fill_percent, millis() - loop_start_time_, puffer_size_start_);
 }
 
 void UARTTPM2::get_one_tpm2_package() {

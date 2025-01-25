@@ -21,6 +21,7 @@ class UARTTPM2 : public Component, public uart::UARTDevice {
   unsigned char it_intern_[1350]; // Interne Variable als unsigned char Array
   uint32_t last_log_time_ = 0; // Zeitstempel für das letzte Log
   uint32_t loop_start_time_ = 0; // Zeitstempel Start
+  int puffer_size_start_ = 0; // Wieviele Bytes im Puffer
   uint32_t frames_processed_ = 0; // Anzahl der verarbeiteten Frames
   uint32_t frames_dropped_ = 0; // Anzahl der verworfenen Frames
 
