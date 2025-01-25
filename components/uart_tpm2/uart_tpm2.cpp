@@ -1,6 +1,11 @@
 #include "uart_tpm2.h"
 #include <cstring> // Für memcpy
-#include <Arduino.h> // Für millis()
+//#include <Arduino.h> // Für millis()
+
+#include "esp_timer.h"
+uint32_t millis() {
+    return (uint32_t)(esp_timer_get_time() / 1000ULL);
+}
 
 namespace esphome {
 namespace uart_tpm2 {
