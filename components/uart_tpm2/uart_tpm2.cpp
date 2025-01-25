@@ -117,7 +117,7 @@ void UARTTPM2::loop()
             // Andere Zeichen ignorieren, bis wir 0xC9 sehen
         }
     }
-
+    return; // so is nach einem mal schaun fertig bis zum nächsten durchlauf
 }
 
 void UARTTPM2::processTPM2Packet(const std::vector<char>& packet) 
