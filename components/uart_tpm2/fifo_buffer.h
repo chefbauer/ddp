@@ -2,6 +2,7 @@
 #define FIFO_BUFFER_H
 
 #include <vector>
+#include <cstddef>
 
 class FIFOBuffer {
 private:
