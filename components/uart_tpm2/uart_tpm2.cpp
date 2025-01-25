@@ -124,7 +124,7 @@ void UARTTPM2::loop()
         if (read_success)
         {
             written_bytes = fifo.write(buffer, buffer_size);
-            ESP_LOGI("uart_tpm2", "UART Lesezeit: %u msec, millis() - loop_start_time_);
+            ESP_LOGI("uart_tpm2", "UART Lesezeit: %u msec", millis() - loop_start_time_);
         }
         // Debug: Logge die geschriebenen Bytes
         //ESP_LOGD("uart_tpm2", "Geschrieben: %u Bytes", written_bytes);
