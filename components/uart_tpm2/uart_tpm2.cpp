@@ -23,7 +23,7 @@ void UARTTPM2::loop()
     static uint32_t start_time = 0; // Zeit, wann wir angefangen haben, auf weitere Daten zu warten
     loop_start_time_ = millis(); // Zeitstempel für den Schleifenbeginn
     puffer_size_start_ = available();
-    if (available() < 1000)
+    if (available() < 1500)
     {
       return;
     }
