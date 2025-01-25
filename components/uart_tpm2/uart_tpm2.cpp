@@ -48,7 +48,7 @@ void UARTTPM2::loop()
 
         if (written_bytes != buffer_size) {
             ESP_LOGW("uart_tpm2", "Nicht alle Bytes konnten in den FIFO-Puffer geschrieben werden. Gelesen: %u, Geschrieben: %u", 
-                     read_bytes, written_bytes);
+                     buffer_size, written_bytes);
         }
     }
 
