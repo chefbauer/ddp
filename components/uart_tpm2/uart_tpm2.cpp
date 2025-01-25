@@ -6,7 +6,7 @@ namespace esphome {
 namespace uart_tpm2 {
 
 // Definition der statischen Variable
-Color UARTTPM2::it_bg[450];
+unsigned char UARTTPM2::it_bg[450][3];
 
 void UARTTPM2::setup() {
   last_log_time_ = millis(); // Starte die Zeitmessung beim Setup
@@ -37,7 +37,6 @@ void UARTTPM2::loop()
                         {
                             receiving_ = false;
                             frames_processed_++;
-                            // Hier wird die neue Signatur verwendet
                             processTPM2Packet(current_packet_.data() + 4, data_size); // Skip 4 bytes (Header + Size)
                             resetReception(); // Paket verarbeitet
                             return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
@@ -51,7 +50,6 @@ void UARTTPM2::loop()
                             {
                                 receiving_ = false;
                                 frames_processed_++;
-                                // Hier wird die neue Signatur verwendet
                                 processTPM2Packet(current_packet_.data() + 4, data_size);
                                 resetReception(); // Paket verarbeitet
                                 // Start a new packet with the extra byte
@@ -121,11 +119,12 @@ void UARTTPM2::loop()
     }
 }
 
-// Direkte Kopie aus dem Puffer ins Array! :)
-void UARTTPM2::processTPM2Packet(const char* packet, int size) {
-    int bytes_to_copy = std::min(size, 450 * 3);
+void UARTTPM2::processTPM2Packet(const char* packet, int size) 
+{
+    size_t bytes_to_copy = std::min(size, 450 * 3);
     memcpy(it_intern_, packet, bytes_to_copy);
-    memcpy(it_bg, it_intern_, sizeof(Color) * 450);
+    memcpy(it_bg, it_intern_, sizeof(it_intern_)); // memcpy wird verwendet, da es in der Regel schneller ist
+    //ESP_LOGD("uart_tpm2", "Processed %d colors", bytes_to_copy / 3);
 
     // Logge die Statistik alle 5 Sekunden
     uint32_t now = millis();
@@ -136,21 +135,6 @@ void UARTTPM2::processTPM2Packet(const char* packet, int size) {
         frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
     }
 }
-
-// void UARTTPM2::processTPM2Packet(const std::vector<char>& packet) 
-// {
-//     int data_index = 0;
-//     for (int i = 0; i < std::min((int)packet.size() / 3, 450); ++i) {
-//         if (data_index + 2 < packet.size()) {
-//             it_intern_[i].r = packet[data_index];
-//             it_intern_[i].g = packet[data_index + 1];
-//             it_intern_[i].b = packet[data_index + 2];
-//             data_index += 3;
-//         }
-//     }
-//     memcpy(it_bg, it_intern_, sizeof(Color) * 450); // memcpy wird verwendet, da es in der Regel schneller ist
-//     //ESP_LOGD("uart_tpm2", "Processed %d colors", data_index / 3);
-//}
 
 void UARTTPM2::resetReception() 
 {
@@ -169,9 +153,8 @@ void UARTTPM2::log_frame_stats() {
 
 void UARTTPM2::get_one_tpm2_package() {
     write(0x4C); // Sende das Zeichen 0x4C per UART
-    //ESP_LOGI("uart_tpm2", "Gesendet: 0x4C");
+    ESP_LOGI("uart_tpm2", "Gesendet: 0x4C");
 }
-
 
 }  // namespace uart_tpm2
 }  // namespace esphome
