@@ -37,15 +37,14 @@ void UARTTPM2::loop()
         ESP_LOGD("uart_tpm2", "buffer_size: %u Bytes", buffer_size);
 
         // Lies alle verfügbaren Daten auf einmal in den Buffer
-        size_t read_bytes = read_array(buffer, buffer_size);
-
-        // Debug: Logge die gelesenen Bytes
-        ESP_LOGD("uart_tpm2", "Gelesen: %u Bytes", read_bytes);
-
-        size_t written_bytes = fifo.write(buffer, read_bytes);
-
+        bool read_success = read_array(buffer, buffer_size);
+        size_t written_bytes = 0; // Initialisiere written_bytes
+        if (read_success)
+        {
+            written_bytes = fifo.write(buffer, buffer_size);
+        }
         // Debug: Logge die geschriebenen Bytes
-        ESP_LOGD("uart_tpm2", "Geschrieben: %u Bytes", written_bytes);
+        //ESP_LOGD("uart_tpm2", "Geschrieben: %u Bytes", written_bytes);
 
         if (written_bytes != read_bytes) {
             ESP_LOGW("uart_tpm2", "Nicht alle Bytes konnten in den FIFO-Puffer geschrieben werden. Gelesen: %u, Geschrieben: %u", 
