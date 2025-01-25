@@ -62,8 +62,20 @@ void UARTTPM2::loop()
                             unsigned char* data = new unsigned char[data_size];
                             fifo.read(data, data_size);
 
+                            memcpy(it_bg, data, data_size); // Direkte Kopie der Daten in it_bg
+                            ESP_LOGD("uart_tpm2", "Processed %d colors", data_size / 3);
+
+                            // Logge die Statistik alle 5 Sekunden
+                            uint32_t now = millis();
+                            if (now - last_log_time_ >= 5000) {
+                                log_frame_stats();
+                                last_log_time_ = now;
+                                frames_processed_ = 0; // Zurücksetzen der Frames für die nächste Periode
+                                frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
+                            }
+
                             // Verarbeite die Daten
-                            processTPM2Packet(data, data_size);
+                            //processTPM2Packet(data, data_size);
 
                             delete[] data; // Speicher freigeben
 
@@ -247,20 +259,20 @@ void UARTTPM2::loop()
 // }
 //}
 
-void UARTTPM2::processTPM2Packet(const unsigned char* packet, int size) 
-{
-    memcpy(it_bg, packet, size); // Direkte Kopie der Daten in it_bg
-    ESP_LOGD("uart_tpm2", "Processed %d colors", size / 3);
+// void UARTTPM2::processTPM2Packet(const unsigned char* packet, int size) 
+// {
+//     memcpy(it_bg, packet, size); // Direkte Kopie der Daten in it_bg
+//     ESP_LOGD("uart_tpm2", "Processed %d colors", size / 3);
 
-    // Logge die Statistik alle 5 Sekunden
-    uint32_t now = millis();
-    if (now - last_log_time_ >= 5000) {
-        log_frame_stats();
-        last_log_time_ = now;
-        frames_processed_ = 0; // Zurücksetzen der Frames für die nächste Periode
-        frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
-    }
-}
+//     // Logge die Statistik alle 5 Sekunden
+//     uint32_t now = millis();
+//     if (now - last_log_time_ >= 5000) {
+//         log_frame_stats();
+//         last_log_time_ = now;
+//         frames_processed_ = 0; // Zurücksetzen der Frames für die nächste Periode
+//         frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
+//     }
+// }
 
 void UARTTPM2::resetReception() 
 {
