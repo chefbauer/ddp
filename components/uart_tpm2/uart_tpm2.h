@@ -29,7 +29,7 @@ class UARTTPM2 : public Component, public uart::UARTDevice {
   // FIFO PUFFER
   static FIFOBuffer fifo;  // Deklaration der statischen Variable
 
-  void processTPM2Packet(const char* packet, int size);
+  void processTPM2Packet(const unsigned char* packet, int size); // Geändert zu unsigned char*
   void resetReception();
   void log_frame_stats();
 };
