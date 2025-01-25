@@ -47,7 +47,7 @@ void UARTTPM2::loop()
     puffer_size_start_ = fifo.getSize();
     if (puffer_size_start_ < 4000)
     {
-      return;
+      //return;
     }
 
 
