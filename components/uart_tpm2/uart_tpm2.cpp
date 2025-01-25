@@ -112,6 +112,7 @@ void UARTTPM2::loop()
         }
     }
 
+}
 
 void UARTTPM2::processTPM2Packet(const char* packet, int size) 
 {
