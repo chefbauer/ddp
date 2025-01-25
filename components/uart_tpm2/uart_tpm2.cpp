@@ -21,7 +21,7 @@ void UARTTPM2::loop()
     if (available_bytes > 0) 
     {
         // Puffergröße bestimmen und sicherstellen, dass wir nicht mehr lesen, als wir Puffer haben
-        size_t buffer_size = std::min(static_cast<size_t>(available_bytes), max_packet_size_);
+        size_t buffer_size = std::min(static_cast<size_t>(available_bytes), static_cast<size_t>(max_packet_size_));
         unsigned char buffer[buffer_size]; // Änderung hier: unsigned char statt char
         
         // Lies alle verfügbaren Daten auf einmal in den Buffer
@@ -49,7 +49,8 @@ void UARTTPM2::loop()
                                 processTPM2Packet(current_packet_.data() + 4, data_size); // Skip 4 bytes (Header + Size)
                                 resetReception(); // Paket verarbeitet
                                 return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
-                                                            else if (current_packet_.size() > expected_size)
+                            }
+                            else if (current_packet_.size() > expected_size)
                             {
                                 // Paket ist größer als erwartet, schneide das überschüssige Byte ab und behalte es für das nächste Paket
                                 char next_byte = current_packet_.back();
@@ -123,7 +124,6 @@ void UARTTPM2::loop()
     }
 
 }
-
 
 
 void UARTTPM2::processTPM2Packet(const char* packet, int size) 
