@@ -21,7 +21,7 @@ void UARTTPM2::setup() {
   resetReception();
 }
 
-FIFOBuffer UARTTPM2::fifo(8192);  // Initialisierung der statischen Variable mit einer Größe von 16KB
+FIFOBuffer UARTTPM2::fifo(16384);  // Initialisierung der statischen Variable mit einer Größe von 16KB
 
 
 // void UARTTPM2::loop()
@@ -31,7 +31,7 @@ FIFOBuffer UARTTPM2::fifo(8192);  // Initialisierung der statischen Variable mit
 
 //     int available_bytes = available();
 //     if (available_bytes > 0) {
-//         size_t buffer_size = std::min(static_cast<size_t>(available_bytes), 4096u); 
+//         size_t buffer_size = std::min(static_cast<size_t>(available_bytes), 8192u); 
 //         unsigned char buffer[buffer_size]; 
         
 //         bool read_success = read_array(buffer, buffer_size);
@@ -140,7 +140,7 @@ void UARTTPM2::loop()
     if (puffer_size_start_ < 1200 && puffer_size_start_ > 0)
     {
       //ESP_LOGW("uart_tpm2", "Zu wenig gepuffert: %u Bytes | UART Puffer: %u", puffer_size_start_, available_bytes); 
-      return;
+      //return;
     }
 
 
@@ -209,11 +209,11 @@ void UARTTPM2::loop()
                                 ESP_LOGW("uart_tpm2", "Ungültiges Paket, zu viele Daten");
                                 frames_dropped_++;
                                 resetReception(); // Reset und warte auf neues Paket
-                                if (next_byte == 0xC9) 
-                                {
-                                    current_packet_.push_back(next_byte);
-                                    receiving_ = true;
-                                }
+                                // if (next_byte == 0xC9) 
+                                // {
+                                //     current_packet_.push_back(next_byte);
+                                //     receiving_ = true;
+                                // }
                                 return; // Beende die Schleife
                             }
                         }
