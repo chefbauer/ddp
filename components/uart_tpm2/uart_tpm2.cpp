@@ -110,7 +110,7 @@ void UARTTPM2::loop()
     static uint32_t start_time = 0; // Zeit, wann wir angefangen haben, auf weitere Daten zu warten
     loop_start_time_ = millis(); // Zeitstempel für den Schleifenbeginn
 
-    if (auto_mode_enabled_flag_ && loop_start_time_ - last_package_processed_ >= 500)
+    if (auto_mode_enabled_flag_ && last_package_processed_ > 0 && loop_start_time_ - last_package_processed_ >= 500)
     {
         get_one_tpm2_package(); // startet bzw. alle 1/2 sekunden ein Paket wenn nichts mehr kommt.
     }
@@ -172,9 +172,11 @@ void UARTTPM2::loop()
                             receiving_ = false;
                             frames_processed_++;
                             //processTPM2Packet(current_packet_.data() + 4, data_size); // Skip 4 bytes (Header + Size)
+                            
                             // Direkte Kopie
                             memcpy(it_bg, current_packet_.data() + 4, data_size); // Direkte Kopie der Daten in it_bg
                             resetReception(); // Paket verarbeitet
+                            last_package_processed_ = millis();
 
                             // Logge die Statistik alle 5 Sekunden
                             uint32_t now = millis();
