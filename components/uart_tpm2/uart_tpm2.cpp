@@ -115,6 +115,7 @@ void UARTTPM2::loop()
                           frames_dropped_++;
                           resetReception(); // Reset und warte auf neues Paket
                           ESP_LOGW("uart_tpm2", "Ungültiges Paket, zu viele Daten");
+                          FIFOBuffer UARTTPM2::fifo(fifo_size);  // zur sicherheit! Initialisierung der statischen Variable mit einer Größe von 16KB
                           return; // Beende die Schleife
                         }
 
