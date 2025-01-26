@@ -105,7 +105,7 @@ void UARTTPM2::loop()
                                 frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
                             }
                             int fps_wait_time_msec = 1000 / auto_mode_fps_target_;
-                            if (auto_mode_enabled_flag_ && fifo.getSize() < 1.5 * expected_size && fps_wait_time_msec > millis() - last_package_processed_)
+                            if (auto_mode_enabled_flag_ && (fifo.getSize() < 1.5 * expected_size) && fps_wait_time_msec > (millis() - last_package_processed_))
                             {
                               get_one_tpm2_package(); // nur ein Ping :)
                               // reguliert sich so selbst!
