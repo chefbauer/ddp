@@ -94,7 +94,6 @@ void UARTTPM2::loop()
                             // Direkte Kopie
                             memcpy(it_bg, current_packet_.data() + 4, data_size); // Direkte Kopie der Daten in it_bg
                             resetReception(); // Paket verarbeitet
-                            last_package_processed_ = millis();
 
                             // Logge die Statistik alle 5 Sekunden
                             uint32_t now = millis();
@@ -110,6 +109,7 @@ void UARTTPM2::loop()
                               get_one_tpm2_package(); // nur ein Ping :)
                               // reguliert sich so selbst!
                             }
+                            last_package_processed_ = millis();
                             return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
                         }
                         else if (current_packet_.size() > expected_size)
