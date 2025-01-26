@@ -28,10 +28,10 @@ void UARTTPM2::loop()
     static uint32_t start_time = 0; // Zeit, wann wir angefangen haben, auf weitere Daten zu warten
     loop_start_time_ = millis(); // Zeitstempel für den Schleifenbeginn
 
-    // if (auto_mode_enabled_flag_ && last_package_processed_ > 0 && loop_start_time_ - last_package_processed_ >= 500)
-    // {
-    //     get_one_tpm2_package(); // startet bzw. alle 1/2 sekunden ein Paket wenn nichts mehr kommt.
-    // }
+    if (auto_mode_enabled_flag_ && last_package_processed_ > 0 && loop_start_time_ - last_package_processed_ >= 500)
+    {
+        get_one_tpm2_package(); // startet bzw. alle 1/2 sekunden ein Paket wenn nichts mehr kommt.
+    }
     int available_bytes = available();
     if (available_bytes > 0) {
         // Puffergröße bestimmen und sicherstellen, dass wir nicht mehr lesen, als wir Puffer haben
@@ -104,7 +104,8 @@ void UARTTPM2::loop()
                                 frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
                             }
                             int fps_wait_time_msec = 1000 / auto_mode_fps_target_;
-                            if (auto_mode_enabled_flag_ && (fifo.getSize() < 1.5 * expected_size) && fps_wait_time_msec > (millis() - last_package_processed_))
+#                            if (auto_mode_enabled_flag_ && (fifo.getSize() < 1.5 * expected_size) && fps_wait_time_msec > (millis() - last_package_processed_))
+                            if (auto_mode_enabled_flag_ && fps_wait_time_msec > (millis() - last_package_processed_))
                             {
                               get_one_tpm2_package(); // nur ein Ping :)
                               // reguliert sich so selbst!
