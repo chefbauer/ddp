@@ -21,6 +21,7 @@ public:
     size_t getMaxSize() const;
     unsigned char readAt(size_t index) const; // Für den Zugriff auf ein Byte ohne Leseposition zu verändern
     void advanceReadPos(size_t amount); // Erhöht die Leseposition
+    void clear(); // Lösche puffer, neustart
 };
 
 #endif // FIFO_BUFFER_H

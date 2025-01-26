@@ -69,3 +69,8 @@ void FIFOBuffer::advanceReadPos(size_t amount) {
     read_pos = (read_pos + amount) % buffer.size();
     size -= amount;
 }
+
+void FIFOBuffer::clear() {
+    read_pos = 0;
+    write_pos = 0;
+}
