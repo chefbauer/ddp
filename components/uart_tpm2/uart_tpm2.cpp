@@ -21,7 +21,7 @@ void UARTTPM2::setup() {
   resetReception();
 }
 
-int fifo_size = 8192;
+int fifo_size = 16384;
 FIFOBuffer UARTTPM2::fifo(fifo_size);  // Initialisierung der statischen Variable mit einer Größe von 16KB
 
 void UARTTPM2::loop() 
@@ -103,7 +103,7 @@ void UARTTPM2::loop()
                                 frames_processed_ = 0; // Zurücksetzen der Frames für die nächste Periode
                                 frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
                             }
-                            if (auto_mode_enabled_flag_ && fifo.getSize() < fifo_size/2)
+                            if (auto_mode_enabled_flag_ && (fifo.getSize() < fifo_size/4))
                             {
                               get_one_tpm2_package(); // nur ein Ping :)
                               // reguliert sich so selbst!
