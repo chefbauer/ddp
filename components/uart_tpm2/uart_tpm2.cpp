@@ -110,7 +110,7 @@ void UARTTPM2::loop()
                             }
                             return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
                         }
-                        else (current_packet_.size() > expected_size)
+                        else  // (current_packet_.size() > expected_size)
                         {
                           frames_dropped_++;
                           resetReception(); // Reset und warte auf neues Paket
