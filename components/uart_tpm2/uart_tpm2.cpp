@@ -19,9 +19,9 @@ unsigned char UARTTPM2::it_bg[1350];
 void UARTTPM2::setup() {
   last_log_time_ = millis(); // Starte die Zeitmessung beim Setup
   resetReception();
-}
 
-FIFOBuffer UARTTPM2::fifo(16384);  // Initialisierung der statischen Variable mit einer Größe von 16KB
+int fifo_size = 8192;
+FIFOBuffer UARTTPM2::fifo(fifo_size);  // Initialisierung der statischen Variable mit einer Größe von 16KB
 
 
 void UARTTPM2::loop() 
@@ -103,7 +103,7 @@ void UARTTPM2::loop()
                                 frames_processed_ = 0; // Zurücksetzen der Frames für die nächste Periode
                                 frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
                             }
-                            if (auto_mode_enabled_flag_ && fifo.getSize() < 2 * expected_size)
+                            if (auto_mode_enabled_flag_ && fifo.getSize() < 2 * fifo_size)
                             {
                               get_one_tpm2_package(); // nur ein Ping :)
                               // reguliert sich so selbst!
