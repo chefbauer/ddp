@@ -21,15 +21,96 @@ void UARTTPM2::setup() {
   resetReception();
 }
 
-int fifo_size = 16384;
-FIFOBuffer UARTTPM2::fifo(fifo_size);  // Initialisierung der statischen Variable mit einer Größe von 16KB
+FIFOBuffer UARTTPM2::fifo(16384);  // Initialisierung der statischen Variable mit einer Größe von 16KB
+
+
+// void UARTTPM2::loop()
+// {
+//     static uint32_t start_time = 0; 
+//     loop_start_time_ = millis();
+
+//     int available_bytes = available();
+//     if (available_bytes > 0) {
+//         size_t buffer_size = std::min(static_cast<size_t>(available_bytes), 8192u); 
+//         unsigned char buffer[buffer_size]; 
+        
+//         bool read_success = read_array(buffer, buffer_size);
+//         if (read_success) {
+//             size_t written_bytes = fifo.write(buffer, buffer_size);
+//             //ESP_LOGD("uart_tpm2", "Geschrieben: %u Bytes", written_bytes);
+
+//             puffer_size_start_ = fifo.getSize();
+//             if (puffer_size_start_ < 4000 && puffer_size_start_ > 0)
+//             {
+//               ESP_LOGW("uart_tpm2", "Zu wenig gepuffert: %u Bytes | UART Puffer: %u", puffer_size_start_, available_bytes); 
+//               return;
+//             }
+
+//             // Paketverarbeitung
+//             while (fifo.available() >= 4) { // Mindestens Header + Größe
+//                 unsigned char header_check[4];
+//                 fifo.read(header_check, 4); // Header lesen
+
+//                 if (header_check[0] == 0xC9 && header_check[1] == 0xDA) {
+//                     uint16_t data_size = (header_check[2] << 8) | header_check[3];
+//                     uint16_t expected_size = 2 + 2 + data_size + 1; // Header(2) + Paketgröße(2) + Daten(data_size) + Endbyte(1)
+
+//                     if (fifo.available() >= expected_size - 4) { // -4 weil wir schon 4 Bytes gelesen haben
+//                         // Prüfe das Endbyte
+//                         unsigned char end_byte = fifo.readAt(expected_size - 5); // -5 weil wir Header und Größe bereits gelesen haben
+//                         if (end_byte == 0x36) {
+//                             // Kopiere die Daten
+//                             unsigned char* data = new unsigned char[data_size];
+//                             fifo.read(data, data_size);
+
+//                             memcpy(it_bg, data, data_size); // Direkte Kopie der Daten in it_bg
+//                             ESP_LOGD("uart_tpm2", "Processed %d colors", data_size / 3);
+
+//                             // Logge die Statistik alle 5 Sekunden
+//                             uint32_t now = millis();
+//                             if (now - last_log_time_ >= 5000) {
+//                                 log_frame_stats();
+//                                 last_log_time_ = now;
+//                                 frames_processed_ = 0; // Zurücksetzen der Frames für die nächste Periode
+//                                 frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
+//                             }
+
+//                             // Verarbeite die Daten
+//                             //processTPM2Packet(data, data_size);
+
+//                             delete[] data; // Speicher freigeben
+
+//                             // Entferne das Endbyte
+//                             fifo.advanceReadPos(1); // Das Endbyte überspringen
+
+//                             frames_processed_++;
+//                             continue; // Zum nächsten Paket übergehen
+//                         }
+//                         // Wenn das Endbyte nicht passt, das gesamte Paket zurück in den Puffer, da wir es nicht verwenden können
+//                         fifo.write(header_check, 4);
+//                         fifo.advanceReadPos(expected_size - 4); // Überspringe die restlichen Bytes des Pakets
+//                     } else {
+//                         // Paket ist unvollständig, Header zurück in den Puffer schreiben
+//                         fifo.write(header_check, 4);
+//                         break; // Abbrechen und auf weiteres Daten warten
+//                     }
+//                 } else {
+//                     // Falls der Header nicht passt, das erste Byte zurück in den Puffer
+//                     fifo.write(header_check, 1); 
+//                 }
+//             }
+//         }
+//     }
+// }
+
+
 
 void UARTTPM2::loop() 
 {
     static uint32_t start_time = 0; // Zeit, wann wir angefangen haben, auf weitere Daten zu warten
     loop_start_time_ = millis(); // Zeitstempel für den Schleifenbeginn
 
-    // if (auto_mode_enabled_flag_ && loop_start_time_ - last_package_processed_ >= 500 && fifo.getSize() < fifo_size/4)
+    // if (auto_mode_enabled_flag_ && loop_start_time_ - last_package_processed_ >= 500)
     // {
     //     get_one_tpm2_package(); // startet bzw. alle 1/2 sekunden ein Paket wenn nichts mehr kommt.
     // }
@@ -103,58 +184,48 @@ void UARTTPM2::loop()
                                 frames_processed_ = 0; // Zurücksetzen der Frames für die nächste Periode
                                 frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
                             }
-                            if (auto_mode_enabled_flag_ && (fifo.getSize() < fifo_size/4))
-                            {
-                              get_one_tpm2_package(); // nur ein Ping :)
-                              // reguliert sich so selbst!
-                            }
+                            // if (auto_mode_enabled_flag_ && fifo.getSize() < 1.5 * expected_size)
+                            // {
+                            //   get_one_tpm2_package(); // nur ein Ping :)
+                            //   // reguliert sich so selbst!
+                            // }
                             return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
                         }
-                        else  // (current_packet_.size() > expected_size)
+                        else if (current_packet_.size() > expected_size)
                         {
-                          frames_dropped_++;
-                          resetReception(); // Reset und warte auf neues Paket
-                          ESP_LOGW("uart_tpm2", "Ungültiges Paket, zu viele Daten");
-                          fifo.clear();
-                          return; // Beende die Schleife
+                            // Paket ist größer als erwartet, schneide das überschüssige Byte ab und behalte es für das nächste Paket
+                            char next_byte = current_packet_.back();
+                            current_packet_.pop_back();
+                            if (current_packet_.back() == 0x36) 
+                            {
+                                receiving_ = false;
+                                frames_processed_++;
+                                //processTPM2Packet(current_packet_.data() + 4, data_size); // Skip 4 bytes (Header + Size)
+                                // Direkte Kopie
+                                memcpy(it_bg, current_packet_.data() + 4, data_size); // Direkte Kopie der Daten in it_bg
+                                resetReception(); // Paket verarbeitet
+                                // Start a new packet with the extra byte
+                                if (next_byte == 0xC9) 
+                                {
+                                    current_packet_.push_back(next_byte);
+                                    receiving_ = true;
+                                }
+                                return; // Beende die Schleife
+                            }
+                            else
+                            {
+                                // Paket ist ungültig, resetten
+                                ESP_LOGW("uart_tpm2", "Ungültiges Paket, zu viele Daten");
+                                frames_dropped_++;
+                                resetReception(); // Reset und warte auf neues Paket
+                                // if (next_byte == 0xC9) 
+                                // {
+                                //     current_packet_.push_back(next_byte);
+                                //     receiving_ = true;
+                                // }
+                                return; // Beende die Schleife
+                            }
                         }
-
-
-                        // else if (current_packet_.size() > expected_size)
-
-                        //     // Paket ist größer als erwartet, schneide das überschüssige Byte ab und behalte es für das nächste Paket
-                        //     char next_byte = current_packet_.back();
-                        //     current_packet_.pop_back();
-                        //     if (current_packet_.back() == 0x36) 
-                        //     {
-                        //         receiving_ = false;
-                        //         frames_processed_++;
-                        //         //processTPM2Packet(current_packet_.data() + 4, data_size); // Skip 4 bytes (Header + Size)
-                        //         // Direkte Kopie
-                        //         memcpy(it_bg, current_packet_.data() + 4, data_size); // Direkte Kopie der Daten in it_bg
-                        //         resetReception(); // Paket verarbeitet
-                        //         // Start a new packet with the extra byte
-                        //         if (next_byte == 0xC9) 
-                        //         {
-                        //             current_packet_.push_back(next_byte);
-                        //             receiving_ = true;
-                        //         }
-                        //         return; // Beende die Schleife
-                        //     }
-                        //     else
-                        //     {
-                        //         // Paket ist ungültig, resetten
-                        //         ESP_LOGW("uart_tpm2", "Ungültiges Paket, zu viele Daten");
-                        //         frames_dropped_++;
-                        //         resetReception(); // Reset und warte auf neues Paket
-                        //         // if (next_byte == 0xC9) 
-                        //         // {
-                        //         //     current_packet_.push_back(next_byte);
-                        //         //     receiving_ = true;
-                        //         // }
-                        //         return; // Beende die Schleife
-                        //     }
-                        // }
                     }
                     else
                     {
@@ -194,6 +265,37 @@ void UARTTPM2::loop()
     }
 }
 
+// void UARTTPM2::processTPM2Packet(const char* packet, int size) 
+// {
+//     size_t bytes_to_copy = std::min(size, 1350);
+//     memcpy(it_bg, packet, bytes_to_copy); 
+//     //ESP_LOGD("uart_tpm2", "Processed %d colors", bytes_to_copy / 3);
+
+//     // Logge die Statistik alle 5 Sekunden
+//     uint32_t now = millis();
+//     if (now - last_log_time_ >= 5000) {
+//         log_frame_stats();
+//         last_log_time_ = now;
+//         frames_processed_ = 0; // Zurücksetzen der Frames für die nächste Periode
+//         frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
+//     }
+// }
+//}
+
+void UARTTPM2::processTPM2Packet(const unsigned char* packet, int size) 
+{
+    memcpy(it_bg, packet, size); // Direkte Kopie der Daten in it_bg
+    ESP_LOGD("uart_tpm2", "Processed %d colors", size / 3);
+
+    // Logge die Statistik alle 5 Sekunden
+    uint32_t now = millis();
+    if (now - last_log_time_ >= 5000) {
+        log_frame_stats();
+        last_log_time_ = now;
+        frames_processed_ = 0; // Zurücksetzen der Frames für die nächste Periode
+        frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
+    }
+}
 
 void UARTTPM2::resetReception() 
 {
