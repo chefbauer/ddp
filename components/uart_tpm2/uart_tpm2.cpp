@@ -110,10 +110,11 @@ void UARTTPM2::loop()
                             }
                             return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
                         }
-                        else if (current_packet_.size() > expected_size)
+                        else (current_packet_.size() > expected_size)
                         {
                           frames_dropped_++;
                           resetReception(); // Reset und warte auf neues Paket
+                          ESP_LOGW("uart_tpm2", "Ungültiges Paket, zu viele Daten");
                           return; // Beende die Schleife
                         }
 
