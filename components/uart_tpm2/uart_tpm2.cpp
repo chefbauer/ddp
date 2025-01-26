@@ -19,10 +19,10 @@ unsigned char UARTTPM2::it_bg[1350];
 void UARTTPM2::setup() {
   last_log_time_ = millis(); // Starte die Zeitmessung beim Setup
   resetReception();
+}
 
 int fifo_size = 8192;
 FIFOBuffer UARTTPM2::fifo(fifo_size);  // Initialisierung der statischen Variable mit einer Größe von 16KB
-
 
 void UARTTPM2::loop() 
 {
