@@ -94,7 +94,7 @@ void FIFOBuffer::clear() {
     std::memset(buffer.data(), 0, MaxSize);
 }
 
-size_t FIFOBuffer::delete(size_t len) 
+size_t FIFOBuffer::deleteBytes(size_t len) 
 {
     size_t bytes_to_read = std::min(len, size);
 

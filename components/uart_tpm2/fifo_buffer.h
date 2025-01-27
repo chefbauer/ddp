@@ -23,7 +23,7 @@ public:
     unsigned char readAt(size_t index) const;
     void advanceReadPos(size_t amount);
     void clear();
-    size_t delete(size_t len);
+    size_t deleteBytes(size_t len);
 };
 
 #endif // FIFO_BUFFER_H
