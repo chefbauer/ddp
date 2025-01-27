@@ -14,8 +14,8 @@ namespace uart_tpm2 {
 // Definition der statischen Variable
 unsigned char UARTTPM2::it_bg[1350];
 
-// Initialisierung des statischen FIFOBuffer mit der Größe 16384 Bytes
-FIFOBuffer UARTTPM2::fifo; // Definition der statischen Variable ohne Template-Parameter
+// Initialisierung des statischen FIFOBuffer
+FIFOBuffer UARTTPM2::fifo;
 
 void UARTTPM2::setup() {
   last_log_time_ = millis(); // Starte die Zeitmessung beim Setup
@@ -29,7 +29,6 @@ void UARTTPM2::loop()
 
     if (auto_mode_enabled_flag_ && last_package_processed_ > 0 && loop_start_time_ - last_package_processed_ >= 500)
     {
-        ESP_LOGD("uart_tpm2", "Timeout, fordere TPM2 Paket an");
         get_one_tpm2_package(); // startet bzw. alle 1/2 sekunden ein Paket wenn nichts mehr kommt.
     }
     int available_bytes = available();
@@ -47,7 +46,7 @@ void UARTTPM2::loop()
         if (read_success)
         {
             written_bytes = fifo.write(buffer, buffer_size);
-            ESP_LOGI("uart_tpm2", "UART Lesezeit: %u msec | Buffer gelesen: %u", millis() - loop_start_time_, buffer_size);
+            //ESP_LOGI("uart_tpm2", "UART Lesezeit: %u msec | Buffer gelesen: %u", millis() - loop_start_time_, buffer_size);
         }
         // Debug: Logge die geschriebenen Bytes
         //ESP_LOGD("uart_tpm2", "Geschrieben: %u Bytes", written_bytes);
@@ -70,7 +69,93 @@ void UARTTPM2::loop()
     
         if (receiving_) 
         {
-            // ... (restlicher Code bleibt gleich)
+            current_packet_.push_back(c);
+            if (current_packet_.size() >= 4) // Mindestens Header + Paketgröße
+            {
+                if (current_packet_[0] == 0xC9 && current_packet_[1] == 0xDA) 
+                {
+                    uint16_t data_size = (current_packet_[2] << 8) | current_packet_[3];
+                    uint16_t expected_size = 2 + 2 + data_size + 1; // Header(2) + Paketgröße(2) + Daten(data_size) + Endbyte(1)
+
+                    if (current_packet_.size() >= expected_size) // Paket vollständig oder mehr Daten verfügbar
+                    {
+                        if (current_packet_.back() == 0x36) // Endbyte
+                        {
+                            receiving_ = false;
+                            frames_processed_++;
+                            memcpy(it_bg, current_packet_.data() + 4, data_size); // Direkte Kopie der Daten in it_bg
+                            resetReception(); // Paket verarbeitet
+
+                            // Logge die Statistik alle 5 Sekunden
+                            uint32_t now = millis();
+                            if (now - last_log_time_ >= 5000) {
+                                log_frame_stats();
+                                last_log_time_ = now;
+                                frames_processed_ = 0; // Zurücksetzen der Frames für die nächste Periode
+                                frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
+                            }
+                            int fps_wait_time_msec = 1000 / auto_mode_fps_target_;
+                            if (auto_mode_enabled_flag_ && fps_wait_time_msec > (millis() - last_package_processed_))
+                            {
+                              get_one_tpm2_package(); // nur ein Ping :)
+                              // reguliert sich so selbst!
+                            }
+                            last_package_processed_ = millis();
+                            return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
+                        }
+                        else if (current_packet_.size() > expected_size)
+                        {
+                            // Paket ist größer als erwartet, schneide das überschüssige Byte ab und behalte es für das nächste Paket
+                            char next_byte = current_packet_.back();
+                            current_packet_.pop_back();
+                            if (current_packet_.back() == 0x36) 
+                            {
+                                receiving_ = false;
+                                frames_processed_++;
+                                memcpy(it_bg, current_packet_.data() + 4, data_size); // Direkte Kopie der Daten in it_bg
+                                resetReception(); // Paket verarbeitet
+                                // Start a new packet with the extra byte
+                                if (next_byte == 0xC9) 
+                                {
+                                    current_packet_.push_back(next_byte);
+                                    receiving_ = true;
+                                }
+                                return; // Beende die Schleife
+                            }
+                            else
+                            {
+                                // Paket ist ungültig, resetten
+                                ESP_LOGW("uart_tpm2", "Ungültiges Paket, zu viele Daten");
+                                frames_dropped_++;
+                                resetReception(); // Reset und warte auf neues Paket
+                                return; // Beende die Schleife
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Paket ist noch nicht vollständig, warten wir
+                    }
+                } 
+                else 
+                {
+                    // Ungültiger Header, aber wir behalten das erste Byte, um zu sehen, ob es der Beginn eines neuen Pakets ist
+                    if (current_packet_[0] != 0xC9) 
+                    {
+                        ESP_LOGW("uart_tpm2", "Ungültiger Header");
+                        frames_dropped_++;
+                        resetReception(); // Reset und warte auf neues Paket
+                    }
+                    else if (current_packet_.size() == 1 && c != 0xDA) 
+                    {
+                        // Das erste Byte ist 0xC9, aber das zweite ist nicht 0xDA, resetten
+                        ESP_LOGW("uart_tpm2", "Erwartet 0xDA nach 0xC9, aber bekommen %02X", (unsigned char)c);
+                        frames_dropped_++;
+                        resetReception(); // Reset und warte auf neues Paket
+                    }
+                    // Wenn hierher kommt, bedeutet es, dass wir 0xC9 erhalten haben und warten auf 0xDA
+                }
+            }
         } 
         else // Wir sind nicht im Empfangsmodus
         {
