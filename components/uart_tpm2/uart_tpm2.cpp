@@ -27,10 +27,10 @@ void UARTTPM2::loop()
     static uint32_t start_time = 0; // Zeit, wann wir angefangen haben, auf weitere Daten zu warten
     loop_start_time_ = millis(); // Zeitstempel für den Schleifenbeginn
 
-    if (auto_mode_enabled_flag_ && last_package_processed_time_ > 0 && loop_start_time_ - last_package_processed_time_ >= 500)
-    {
-        get_one_tpm2_package(); // startet bzw. alle 1/2 sekunden ein Paket wenn nichts mehr kommt.
-    }
+    // if (auto_mode_enabled_flag_ && last_package_processed_time_ > 0 && loop_start_time_ - last_package_processed_time_ >= 500)
+    // {
+    //     get_one_tpm2_package(); // startet bzw. alle 1/2 sekunden ein Paket wenn nichts mehr kommt.
+    // }
     int available_bytes = available();
     if (available_bytes > 0) {
         // Puffergröße bestimmen und sicherstellen, dass wir nicht mehr lesen, als wir Puffer haben
@@ -101,36 +101,43 @@ void UARTTPM2::loop()
                               // reguliert sich so selbst!
                             }
                             last_package_processed_time_ = millis();
+                            resetReception(); // Paket verarbeitet
                             return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
                         }
-                        else if (current_packet_.size() > expected_size)
+                        else
                         {
-                            // Paket ist größer als erwartet, schneide das überschüssige Byte ab und behalte es für das nächste Paket
-                            char next_byte = current_packet_.back();
-                            current_packet_.pop_back();
-                            if (current_packet_.back() == 0x36) 
-                            {
-                                receiving_ = false;
-                                frames_processed_++;
-                                memcpy(it_bg, current_packet_.data() + 4, data_size); // Direkte Kopie der Daten in it_bg
-                                resetReception(); // Paket verarbeitet
-                                // Start a new packet with the extra byte
-                                if (next_byte == 0xC9) 
-                                {
-                                    current_packet_.push_back(next_byte);
-                                    receiving_ = true;
-                                }
-                                return; // Beende die Schleife
-                            }
-                            else
-                            {
-                                // Paket ist ungültig, resetten
-                                ESP_LOGW("uart_tpm2", "Ungültiges Paket, zu viele Daten");
-                                frames_dropped_++;
-                                resetReception(); // Reset und warte auf neues Paket
-                                return; // Beende die Schleife
-                            }
+                            last_package_processed_time_ = millis();
+                            resetReception(); // Paket verarbeitet
+                            return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
                         }
+                        // else if (current_packet_.size() > expected_size)
+                        // {
+                        //     // Paket ist größer als erwartet, schneide das überschüssige Byte ab und behalte es für das nächste Paket
+                        //     char next_byte = current_packet_.back();
+                        //     current_packet_.pop_back();
+                        //     if (current_packet_.back() == 0x36) 
+                        //     {
+                        //         receiving_ = false;
+                        //         frames_processed_++;
+                        //         memcpy(it_bg, current_packet_.data() + 4, data_size); // Direkte Kopie der Daten in it_bg
+                        //         resetReception(); // Paket verarbeitet
+                        //         // Start a new packet with the extra byte
+                        //         if (next_byte == 0xC9) 
+                        //         {
+                        //             current_packet_.push_back(next_byte);
+                        //             receiving_ = true;
+                        //         }
+                        //         return; // Beende die Schleife
+                        //     }
+                        //     else
+                        //     {
+                        //         // Paket ist ungültig, resetten
+                        //         ESP_LOGW("uart_tpm2", "Ungültiges Paket, zu viele Daten");
+                        //         frames_dropped_++;
+                        //         resetReception(); // Reset und warte auf neues Paket
+                        //         return; // Beende die Schleife
+                        //     }
+                        // }
                     }
                     else
                     {
