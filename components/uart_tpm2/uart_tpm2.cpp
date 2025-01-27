@@ -13,7 +13,8 @@ namespace uart_tpm2 {
 
 // Definition der statischen Variable
 unsigned char UARTTPM2::it_bg[1350];
-int package_size_target = 394*3+4+1;
+int color_size_target = 394*3;
+int package_size_target = color_size_target+4+1;
 
 // Initialisierung des statischen FIFOBuffer
 FIFOBuffer UARTTPM2::fifo;
@@ -107,7 +108,7 @@ void UARTTPM2::loop()
                     // if (current_packet_.size() >= expected_size) // Paket vollständig oder mehr Daten verfügbar
                     // {
                         //Direkter Check ob Endbyte passt, kopiere und springe vor!
-                        if (fifo.readAt(data_size + 1) == 0x36)      
+                        if (data_size == color_size_target && fifo.readAt(data_size) == 0x36)      ^//datasize = pos!
                         {
                           //Fertig!
                           fifo.read(it_bg, data_size);    // read_pos sollte jetzt auf endbyte liegen
@@ -173,24 +174,34 @@ void UARTTPM2::loop()
                     //     // Paket ist noch nicht vollständig, warten wir
                     // }
                 } 
-                else 
+                else
                 {
                     // Ungültiger Header, aber wir behalten das erste Byte, um zu sehen, ob es der Beginn eines neuen Pakets ist
-                    if (current_packet_[0] != 0xC9) 
-                    {
-                        ESP_LOGW("uart_tpm2", "Ungültiger Header");
-                        frames_dropped_++;
-                        resetReception(); // Reset und warte auf neues Paket
-                    }
-                    else if (current_packet_.size() == 1 && c != 0xDA) 
-                    {
-                        // Das erste Byte ist 0xC9, aber das zweite ist nicht 0xDA, resetten
-                        ESP_LOGW("uart_tpm2", "Erwartet 0xDA nach 0xC9, aber bekommen %02X", (unsigned char)c);
-                        frames_dropped_++;
-                        resetReception(); // Reset und warte auf neues Paket
-                    }
-                    // Wenn hierher kommt, bedeutet es, dass wir 0xC9 erhalten haben und warten auf 0xDA
+                    last_package_processed_time_ = millis();
+                    resetReception(); // Paket verarbeitet
+                    return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
                 }
+
+                
+                // else 
+                // {
+                  
+                //     // Ungültiger Header, aber wir behalten das erste Byte, um zu sehen, ob es der Beginn eines neuen Pakets ist
+                //     if (current_packet_[0] != 0xC9) 
+                //     {
+                //         ESP_LOGW("uart_tpm2", "Ungültiger Header");
+                //         frames_dropped_++;
+                //         resetReception(); // Reset und warte auf neues Paket
+                //     }
+                //     else if (current_packet_.size() == 1 && c != 0xDA) 
+                //     {
+                //         // Das erste Byte ist 0xC9, aber das zweite ist nicht 0xDA, resetten
+                //         ESP_LOGW("uart_tpm2", "Erwartet 0xDA nach 0xC9, aber bekommen %02X", (unsigned char)c);
+                //         frames_dropped_++;
+                //         resetReception(); // Reset und warte auf neues Paket
+                //     }
+                //     // Wenn hierher kommt, bedeutet es, dass wir 0xC9 erhalten haben und warten auf 0xDA
+                // }
             }
         } 
         else // Wir sind nicht im Empfangsmodus
