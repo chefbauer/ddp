@@ -15,7 +15,7 @@ namespace uart_tpm2 {
 unsigned char UARTTPM2::it_bg[1350];
 
 // Initialisierung des statischen FIFOBuffer mit der Größe 16384 Bytes
-FIFOBuffer<16384> UARTTPM2::fifo;
+FIFOBuffer UARTTPM2::fifo; // Definition der statischen Variable ohne Template-Parameter
 
 void UARTTPM2::setup() {
   last_log_time_ = millis(); // Starte die Zeitmessung beim Setup
