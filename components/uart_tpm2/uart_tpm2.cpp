@@ -29,6 +29,7 @@ void UARTTPM2::loop()
 
     if (auto_mode_enabled_flag_ && last_package_processed_ > 0 && loop_start_time_ - last_package_processed_ >= 500)
     {
+        ESP_LOGD("uart_tpm2", "Timeout, fordere TPM2 Paket an);
         get_one_tpm2_package(); // startet bzw. alle 1/2 sekunden ein Paket wenn nichts mehr kommt.
     }
     int available_bytes = available();
@@ -46,7 +47,7 @@ void UARTTPM2::loop()
         if (read_success)
         {
             written_bytes = fifo.write(buffer, buffer_size);
-            //ESP_LOGI("uart_tpm2", "UART Lesezeit: %u msec | Buffer gelesen: %u", millis() - loop_start_time_, buffer_size);
+            ESP_LOGI("uart_tpm2", "UART Lesezeit: %u msec | Buffer gelesen: %u", millis() - loop_start_time_, buffer_size);
         }
         // Debug: Logge die geschriebenen Bytes
         //ESP_LOGD("uart_tpm2", "Geschrieben: %u Bytes", written_bytes);
