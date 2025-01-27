@@ -3,6 +3,8 @@
 
 #include <array>
 #include <cstddef>
+#include <cstring> // Für memcpy und memset
+#include "esp_log.h" // Für ESP_LOGE
 
 template<size_t MaxSize>
 class FIFOBuffer {
@@ -25,11 +27,11 @@ public:
     void clear();
 };
 
-// Alle Methoden müssen im Header definiert werden, da dies ein Template ist
 template<size_t MaxSize>
 size_t FIFOBuffer<MaxSize>::write(const unsigned char* data, size_t len) {
     if (data == nullptr) {
-        throw std::invalid_argument("data pointer is null");
+        ESP_LOGE("FIFOBuffer", "Data pointer is null");
+        return 0; // Fehler, Rückgabe von 0
     }
 
     size_t bytes_to_write = std::min(len, MaxSize - size);
@@ -45,7 +47,8 @@ size_t FIFOBuffer<MaxSize>::write(const unsigned char* data, size_t len) {
 template<size_t MaxSize>
 size_t FIFOBuffer<MaxSize>::read(unsigned char* data, size_t len) {
     if (data == nullptr) {
-        throw std::invalid_argument("data pointer is null");
+        ESP_LOGE("FIFOBuffer", "Data pointer is null");
+        return 0; // Fehler, Rückgabe von 0
     }
 
     size_t bytes_to_read = std::min(len, size);
@@ -70,7 +73,8 @@ size_t FIFOBuffer<MaxSize>::read(unsigned char* data, size_t len) {
 template<size_t MaxSize>
 unsigned char FIFOBuffer<MaxSize>::read() {
     if (size == 0) {
-        throw std::out_of_range("Buffer is empty");
+        ESP_LOGE("FIFOBuffer", "Buffer is empty");
+        return 0; // Fehler, Rückgabe von 0
     }
     
     unsigned char byte = buffer[read_pos];
@@ -98,7 +102,8 @@ size_t FIFOBuffer<MaxSize>::getMaxSize() const {
 template<size_t MaxSize>
 unsigned char FIFOBuffer<MaxSize>::readAt(size_t index) const {
     if (index >= size) {
-        throw std::out_of_range("Index out of range");
+        ESP_LOGE("FIFOBuffer", "Index out of range");
+        return 0; // Fehler, Rückgabe von 0
     }
     return buffer[(read_pos + index) % MaxSize];
 }
@@ -106,7 +111,8 @@ unsigned char FIFOBuffer<MaxSize>::readAt(size_t index) const {
 template<size_t MaxSize>
 void FIFOBuffer<MaxSize>::advanceReadPos(size_t amount) {
     if (amount > size) {
-        throw std::out_of_range("Cannot advance read position beyond buffer size");
+        ESP_LOGE("FIFOBuffer", "Cannot advance read position beyond buffer size");
+        amount = size; // Setzen der Menge auf die verfügbare Größe, um Fehler zu vermeiden
     }
     read_pos = (read_pos + amount) % MaxSize;
     size -= amount;
