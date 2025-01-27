@@ -136,7 +136,7 @@ void UARTTPM2::loop()
                         // }
                         else
                         {
-                            ESP_LOGW("uart_tpm2", "Ungültiges Paket, verwerfe %u Bytes!", data_size);
+                            ESP_LOGW("uart_tpm2", "Ungültiges Paket, verwerfe %u Bytes! -1 0 +1: %x %x %x", data_size, fifo.readAt(data_size-1), fifo.readAt(data_size), fifo.readAt(data_size+1));
                             fifo.deleteBytes(data_size);
                             last_package_processed_time_ = millis();
                             resetReception(); // Paket verarbeitet
