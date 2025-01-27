@@ -81,11 +81,11 @@ void UARTTPM2::loop()
       get_one_tpm2_package(); // nur ein Ping :)
     }    
 
-    //Abbruch wenn zu wenig im Puffer ODER fps zeit pass ned!
-    if (puffer_size_start_ < package_size_target || auto_mode_enabled_flag_ && time_diff < fps_wait_time_msec)
-    {
-      return;
-    }
+    // //Abbruch wenn zu wenig im Puffer ODER fps zeit pass ned!
+    // if (puffer_size_start_ < package_size_target || auto_mode_enabled_flag_ && time_diff < fps_wait_time_msec)
+    // {
+    //   return;
+    // }
 
     while (fifo.available()) {
         unsigned char c = fifo.read();
