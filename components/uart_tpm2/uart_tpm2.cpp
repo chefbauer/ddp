@@ -106,25 +106,33 @@ void UARTTPM2::loop()
 
                     if (current_packet_.size() >= expected_size) // Paket vollständig oder mehr Daten verfügbar
                     {
-                        if (current_packet_.back() == 0x36) // Endbyte
+                        //Direkter Check ob Endbyte passt, kopiere und springe vor!
+                        if (fifo.readAt(data_size + 1) == 0x36)      
                         {
-                            receiving_ = false;
-                            frames_processed_++;
-                            memcpy(it_bg, current_packet_.data() + 4, data_size); // Direkte Kopie der Daten in it_bg
-                            resetReception(); // Paket verarbeitet
+                          //Fertig!
+                          fifo.read(it_bg, data_size);    // read_pos sollte jetzt auf endbyte liegen
+                          current_packet_.push_back(c);   // sollte 0x36 sein
+                          current_packet_.push_back(c);   // zeilenumbruch
 
-                            // Logge die Statistik alle 5 Sekunden
-                            uint32_t now = millis();
-                            if (now - last_log_time_ >= 5000) {
-                                log_frame_stats();
-                                last_log_time_ = now;
-                                frames_processed_ = 0; // Zurücksetzen der Frames für die nächste Periode
-                                frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
-                            }
-                            last_package_processed_time_ = millis();
-                            resetReception(); // Paket verarbeitet
-                            return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
+                          receiving_ = false;
+                          frames_processed_++;
+                          // memcpy(it_bg, current_packet_.data() + 4, data_size); // Direkte Kopie der Daten in it_bg
+
+                          // Logge die Statistik alle 5 Sekunden
+                          uint32_t now = millis();
+                          if (now - last_log_time_ >= 5000) {
+                              log_frame_stats();
+                              last_log_time_ = now;
+                              frames_processed_ = 0; // Zurücksetzen der Frames für die nächste Periode
+                              frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
+                          }
+                          last_package_processed_time_ = millis();
+                          resetReception(); // Paket verarbeitet
+                          return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
                         }
+                        // if (current_packet_.back() == 0x36) // Endbyte
+                        // {
+                        // }
                         else
                         {
                             last_package_processed_time_ = millis();
