@@ -17,7 +17,9 @@ class UARTTPM2 : public Component, public uart::UARTDevice {
   void auto_mode_enable(int auto_mode_fps_target = 0);
   void auto_mode_disable();
   static unsigned char it_bg[1350]; // Interne öffentliche und statische Variable
-
+  void setTargetFPS(int auto_mode_fps_target = 1);
+  void sendJson(const char* jsonText);
+  
  private:
   std::vector<char> current_packet_;
   bool receiving_ = false;

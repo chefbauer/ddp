@@ -232,5 +232,20 @@ void UARTTPM2::auto_mode_disable() {
   auto_mode_enabled_flag_ = false;
 }
 
+void UARTTPM2::setTargetFPS(int auto_mode_fps_target)
+{
+  auto_mode_fps_target_ = auto_mode_fps_target; // noch nicht implementiert
+}
+
+void UARTTPM2::sendJson(const char* jsonText) {
+  if (jsonText != nullptr) {
+    size_t length = strlen(jsonText);
+    for (size_t i = 0; i < length; ++i) {
+      write(jsonText[i]);  // Jeden Char einzeln schreiben
+    }
+    //write('\n');  // Optional: Neue Zeile oder Trennzeichen hinzufügen
+  }
+}
+
 }  // namespace uart_tpm2
 }  // namespace esphome
