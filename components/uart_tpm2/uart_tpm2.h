@@ -1,8 +1,9 @@
 #pragma once
 
 #include "esphome.h"
+#include <vector>
 #include <cstddef>
-#include "fifo_buffer.h" // Sicherstellen, dass Sie die richtige Header-Datei einbinden, die den Template enthält
+#include "fifo_buffer.h"
 
 namespace esphome {
 namespace uart_tpm2 {
@@ -32,8 +33,7 @@ class UARTTPM2 : public Component, public uart::UARTDevice {
   uint32_t frames_dropped_ = 0; // Anzahl der verworfenen Frames
   
   // FIFO PUFFER
-  // Deklaration der statischen Variable mit festgelegter Größe, z.B. 4096 Bytes
-  static DRAM_ATTR FIFOBuffer<16384> fifo;
+  static FIFOBuffer fifo;  // Deklaration der statischen Variable
 
   void processTPM2Packet(const unsigned char* packet, int size); // Geändert zu unsigned char*
   void resetReception();
