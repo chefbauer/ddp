@@ -93,7 +93,7 @@ void UARTTPM2::loop()
     }
     else if (puffer_size_start_ < package_size_target)
     {
-      continue;
+      return;
     }
     while (fifo.available()) {
         unsigned char c = fifo.read();
