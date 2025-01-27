@@ -60,8 +60,8 @@ void UARTTPM2::loop()
     puffer_size_start_ = fifo.getSize();
     if (puffer_size_start_ < 1200 && puffer_size_start_ > 0)
     {
-      //ESP_LOGW("uart_tpm2", "Zu wenig gepuffert: %u Bytes | UART Puffer: %u", puffer_size_start_, available_bytes); 
-      //return;
+      ESP_LOGW("uart_tpm2", "Zu wenig gepuffert: %u Bytes | UART Puffer: %u", puffer_size_start_, available_bytes); 
+      return;
     }
 
     while (fifo.available()) {
@@ -95,9 +95,15 @@ void UARTTPM2::loop()
                                 frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
                             }
                             int fps_wait_time_msec = 1000 / auto_mode_fps_target_;
+                            
                             if (auto_mode_enabled_flag_ && fps_wait_time_msec > (millis() - last_package_processed_time_))
                             {
-                              get_one_tpm2_package(); // nur ein Ping :)
+                                  int puffer_size = fifo.getSize();
+                                  if (puffer_size < 2000)
+                                  {
+                                    ESP_LOGW("uart_tpm2", "Fordere neues Paket an (Wartezeit: %u) | FPS Target: %u", fps_wait_time_msec, auto_mode_fps_target_); 
+                                    get_one_tpm2_package(); // nur ein Ping :)
+                                  }
                               // reguliert sich so selbst!
                             }
                             last_package_processed_time_ = millis();
