@@ -71,6 +71,10 @@ void UARTTPM2::loop()
     }
 
     puffer_size_start_ = fifo.getSize();
+    if (auto_mode_fps_target_ == 0)
+    {
+      auto_mode_fps_target_ = 1;
+    }
     int fps_wait_time_msec = 1000 / auto_mode_fps_target_;
     int time_diff = millis() - last_package_processed_time_;
     // Fordere alle fps_wait_time_msec msec Pakete an bis der Puffer über 3* Paketgröße ist.
@@ -81,11 +85,11 @@ void UARTTPM2::loop()
       get_one_tpm2_package(); // nur ein Ping :)
     }    
 
-    // //Abbruch wenn zu wenig im Puffer ODER fps zeit pass ned!
-    // if (puffer_size_start_ < package_size_target || auto_mode_enabled_flag_ && time_diff < fps_wait_time_msec)
-    // {
-    //   return;
-    // }
+    //Abbruch wenn zu wenig im Puffer ODER fps zeit pass ned!
+    if ((puffer_size_start_ < package_size_target) || (auto_mode_enabled_flag_ && time_diff < fps_wait_time_msec))
+    {
+      return;
+    }
 
     while (fifo.available()) {
         unsigned char c = fifo.read();
