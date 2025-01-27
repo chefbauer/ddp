@@ -81,7 +81,7 @@ void UARTTPM2::loop()
     if (auto_mode_enabled_flag_ && (puffer_size_start_ < (3*package_size_target)) && (time_diff > fps_wait_time_msec))
     {
       //ESP_LOGW("uart_tpm2", "Zu wenig gepuffert: %u Bytes | UART Puffer: %u", puffer_size_start_, available_bytes); 
-      ESP_LOGW("uart_tpm2", "Fordere neues Paket an (Wartezeit: %u) | FPS Target: %u | time_diff: %u", fps_wait_time_msec, auto_mode_fps_target_, time_diff); 
+      ESP_LOGW("uart_tpm2", "Fordere neues Paket an (Wartezeit: %u) | FPS Target: %u | time_diff: %u | Puffer: %u", fps_wait_time_msec, auto_mode_fps_target_, time_diff, puffer_size_start_); 
       get_one_tpm2_package(); // nur ein Ping :)
     }    
 
