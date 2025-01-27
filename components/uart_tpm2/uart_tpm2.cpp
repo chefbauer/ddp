@@ -14,7 +14,7 @@ namespace uart_tpm2 {
 // Definition der statischen Variable
 unsigned char UARTTPM2::it_bg[1350];
 int color_size_target = 396*3; //1188
-int package_size_target = color_size_target+4+1;
+int package_size_target = color_size_target+4+2;
 
 // Initialisierung des statischen FIFOBuffer
 FIFOBuffer UARTTPM2::fifo;
@@ -91,7 +91,10 @@ void UARTTPM2::loop()
     {
       return;
     }
-
+    else if (puffer_size_start_ < package_size_target)
+    {
+      continue;
+    }
     while (fifo.available()) {
         unsigned char c = fifo.read();
     
@@ -105,76 +108,39 @@ void UARTTPM2::loop()
                     uint16_t data_size = (current_packet_[2] << 8) | current_packet_[3];
                     uint16_t expected_size = 2 + 2 + data_size + 1; // Header(2) + Paketgröße(2) + Daten(data_size) + Endbyte(1)
 
-                    // if (current_packet_.size() >= expected_size) // Paket vollständig oder mehr Daten verfügbar
-                    // {
-                        //Direkter Check ob Endbyte passt, kopiere und springe vor!
-                        if (data_size == color_size_target && fifo.readAt(data_size) == 0x36)      //datasize = pos!
-                        {
-                          //Fertig!
-                          fifo.read(it_bg, data_size);    // read_pos sollte jetzt auf endbyte liegen
-                          current_packet_.push_back(c);   // sollte 0x36 sein
-                          current_packet_.push_back(c);   // zeilenumbruch
+                    //Direkter Check ob Endbyte passt, kopiere und springe vor!
+                    if (data_size == color_size_target && fifo.readAt(data_size) == 0x36)      //datasize = pos!
+                    {
+                      //Fertig!
+                      fifo.read(it_bg, data_size);    // read_pos sollte jetzt auf endbyte liegen
+                      current_packet_.push_back(c);   // sollte 0x36 sein
+                      current_packet_.push_back(c);   // zeilenumbruch
 
-                          receiving_ = false;
-                          frames_processed_++;
-                          // memcpy(it_bg, current_packet_.data() + 4, data_size); // Direkte Kopie der Daten in it_bg
+                      receiving_ = false;
+                      frames_processed_++;
+                      // memcpy(it_bg, current_packet_.data() + 4, data_size); // Direkte Kopie der Daten in it_bg
 
-                          // Logge die Statistik alle 5 Sekunden
-                          uint32_t now = millis();
-                          if (now - last_log_time_ >= 5000) {
-                              log_frame_stats();
-                              last_log_time_ = now;
-                              frames_processed_ = 0; // Zurücksetzen der Frames für die nächste Periode
-                              frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
-                          }
-                          last_package_processed_time_ = millis();
-                          resetReception(); // Paket verarbeitet
-                          return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
-                        }
-                        // if (current_packet_.back() == 0x36) // Endbyte
-                        // {
-                        // }
-                        else
-                        {
-                            ESP_LOGW("uart_tpm2", "Ungültiges Paket, verwerfe %u Bytes! -1 0 +1: %x %x %x", data_size, fifo.readAt(data_size-1), fifo.readAt(data_size), fifo.readAt(data_size+1));
-                            fifo.deleteBytes(data_size);
-                            last_package_processed_time_ = millis();
-                            resetReception(); // Paket verarbeitet
-                            return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
-                        }
-                        // else if (current_packet_.size() > expected_size)
-                        // {
-                        //     // Paket ist größer als erwartet, schneide das überschüssige Byte ab und behalte es für das nächste Paket
-                        //     char next_byte = current_packet_.back();
-                        //     current_packet_.pop_back();
-                        //     if (current_packet_.back() == 0x36) 
-                        //     {
-                        //         receiving_ = false;
-                        //         frames_processed_++;
-                        //         memcpy(it_bg, current_packet_.data() + 4, data_size); // Direkte Kopie der Daten in it_bg
-                        //         resetReception(); // Paket verarbeitet
-                        //         // Start a new packet with the extra byte
-                        //         if (next_byte == 0xC9) 
-                        //         {
-                        //             current_packet_.push_back(next_byte);
-                        //             receiving_ = true;
-                        //         }
-                        //         return; // Beende die Schleife
-                        //     }
-                        //     else
-                        //     {
-                        //         // Paket ist ungültig, resetten
-                        //         ESP_LOGW("uart_tpm2", "Ungültiges Paket, zu viele Daten");
-                        //         frames_dropped_++;
-                        //         resetReception(); // Reset und warte auf neues Paket
-                        //         return; // Beende die Schleife
-                        //     }
-                        // }
-                    // }
-                    // else
-                    // {
-                    //     // Paket ist noch nicht vollständig, warten wir
-                    // }
+                      // Logge die Statistik alle 5 Sekunden
+                      uint32_t now = millis();
+                      if (now - last_log_time_ >= 5000) {
+                          log_frame_stats();
+                          last_log_time_ = now;
+                          frames_processed_ = 0; // Zurücksetzen der Frames für die nächste Periode
+                          frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
+                      }
+                      last_package_processed_time_ = millis();
+                      resetReception(); // Paket verarbeitet
+                      return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
+                    }
+                    else
+                    {
+                        ESP_LOGW("uart_tpm2", "Ungültiges Paket, verwerfe %u Bytes! -1 0 +1: %x %x %x", data_size, fifo.readAt(data_size-1), fifo.readAt(data_size), fifo.readAt(data_size+1));
+                        fifo.deleteBytes(data_size);
+                        last_package_processed_time_ = millis();
+                        resetReception(); // Paket verarbeitet
+                        frames_dropped_++;
+                        return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
+                    }
                 } 
                 else
                 {
