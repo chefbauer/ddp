@@ -93,3 +93,21 @@ void FIFOBuffer::clear() {
     size = 0;
     std::memset(buffer.data(), 0, MaxSize);
 }
+
+size_t FIFOBuffer::delete(size_t len) 
+{
+    size_t bytes_to_read = std::min(len, size);
+
+    if (bytes_to_read > 0) {
+        if (read_pos + bytes_to_read <= MaxSize) {
+            std::memset(&buffer[read_pos], 0, bytes_to_read);
+        } else {
+            size_t first_part = MaxSize - read_pos;
+            std::memset(&buffer[read_pos], 0, first_part);
+            std::memset(&buffer[0], 0, bytes_to_read - first_part);
+        }
+        read_pos = (read_pos + bytes_to_read) % MaxSize;
+        size -= bytes_to_read;
+    }
+    return bytes_to_read;
+}

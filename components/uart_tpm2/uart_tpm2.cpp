@@ -108,7 +108,7 @@ void UARTTPM2::loop()
                     // if (current_packet_.size() >= expected_size) // Paket vollständig oder mehr Daten verfügbar
                     // {
                         //Direkter Check ob Endbyte passt, kopiere und springe vor!
-                        if (data_size == color_size_target && fifo.readAt(data_size) == 0x36)      ^//datasize = pos!
+                        if (data_size == color_size_target && fifo.readAt(data_size) == 0x36)      //datasize = pos!
                         {
                           //Fertig!
                           fifo.read(it_bg, data_size);    // read_pos sollte jetzt auf endbyte liegen
@@ -136,6 +136,8 @@ void UARTTPM2::loop()
                         // }
                         else
                         {
+                            ESP_LOGW("uart_tpm2", "Ungültiges Paket, verwerfe %u Bytes!", data_size);
+                            fifo.delete(data_size);
                             last_package_processed_time_ = millis();
                             resetReception(); // Paket verarbeitet
                             return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
