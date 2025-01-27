@@ -72,8 +72,9 @@ void UARTTPM2::loop()
 
     puffer_size_start_ = fifo.getSize();
     int fps_wait_time_msec = 1000 / auto_mode_fps_target_;
+    int time_diff = millis() - last_package_processed_time_;
     // Fordere alle fps_wait_time_msec msec Pakete an bis der Puffer über 3* Paketgröße ist.
-    if (auto_mode_enabled_flag_ && puffer_size_start_ < 3*package_size_target && fps_wait_time_msec > (millis() - last_package_processed_time_))
+    if (auto_mode_enabled_flag_ && puffer_size_start_ < 3*package_size_target && time_diff > fps_wait_time_msec)
     {
       //ESP_LOGW("uart_tpm2", "Zu wenig gepuffert: %u Bytes | UART Puffer: %u", puffer_size_start_, available_bytes); 
       ESP_LOGW("uart_tpm2", "Fordere neues Paket an (Wartezeit: %u) | FPS Target: %u", fps_wait_time_msec, auto_mode_fps_target_); 
