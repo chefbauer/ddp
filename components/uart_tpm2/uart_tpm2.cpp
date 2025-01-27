@@ -13,7 +13,7 @@ namespace uart_tpm2 {
 
 // Definition der statischen Variable
 unsigned char UARTTPM2::it_bg[1350];
-int color_size_target = 394*3;
+int color_size_target = 396*3; //1188
 int package_size_target = color_size_target+4+1;
 
 // Initialisierung des statischen FIFOBuffer
