@@ -4,9 +4,11 @@
 #include <cstddef>
 
 #include "esp_timer.h"
+#ifndef ARDUINO
 uint32_t millis() {
     return (uint32_t)(esp_timer_get_time() / 1000ULL);
 }
+#endif
 
 namespace esphome {
 namespace uart_tpm2 {
@@ -95,7 +97,8 @@ void UARTTPM2::loop()
     {
       return;
     }
-    while (fifo.available()) {
+    while (fifo.available()) 
+    {
         unsigned char c = fifo.read();
     
         if (receiving_) 
@@ -135,7 +138,7 @@ void UARTTPM2::loop()
                     else
                     {
                         ESP_LOGW("uart_tpm2", "Ungültiges Paket, verwerfe %u Bytes! -1 0 +1: %x %x %x", data_size, fifo.readAt(data_size-1), fifo.readAt(data_size), fifo.readAt(data_size+1));
-                        fifo.deleteBytes(data_size);
+                        //fifo.deleteBytes(data_size); ev. wurde das paket nach dem start erneut gesendet? es kostet nur minimal.
                         last_package_processed_time_ = millis();
                         resetReception(); // Paket verarbeitet
                         frames_dropped_++;
