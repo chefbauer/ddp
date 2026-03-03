@@ -21,7 +21,8 @@ void UARTTPM2::setup() {
   resetReception();
 }
 
-FIFOBuffer UARTTPM2::fifo(16384);  // Initialisierung der statischen Variable mit einer Größe von 16KB
+//FIFOBuffer UARTTPM2::fifo(16384);  // Initialisierung der statischen Variable mit einer Größe von 16KB
+FIFOBuffer UARTTPM2::fifo(3072);  // Initialisierung der statischen Variable mit einer Größe von 16KB
 
 void UARTTPM2::loop() 
 {
