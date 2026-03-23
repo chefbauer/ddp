@@ -110,7 +110,6 @@ void UARTTPM2::loop()
         if (fifo.readAt(0) != 0xC9 || fifo.readAt(1) != 0xDA) {
             // Kein gueltiger Header-Start – ein Byte ueberspringen und von vorne
             fifo.advanceReadPos(1);
-            frames_dropped_++;
             continue;
         }
 
@@ -121,7 +120,6 @@ void UARTTPM2::loop()
         if (data_size != (uint16_t)color_size_target) {
             ESP_LOGD("uart_tpm2", "Ungueltiger data_size %u (erwartet %d), ueberspringe 1 Byte", data_size, color_size_target);
             fifo.advanceReadPos(1);
-            frames_dropped_++;
             continue;
         }
 
@@ -132,8 +130,11 @@ void UARTTPM2::loop()
 
         // Endbyte 0x36 an der erwarteten Position prüfen
         if (fifo.readAt(4 + data_size) != 0x36) {
-            ESP_LOGD("uart_tpm2", "Falsches Endbyte 0x%02X an Pos %u, ueberspringe 1 Byte", fifo.readAt(4 + data_size), 4 + data_size);
-            fifo.advanceReadPos(1);
+            // Header+Groesse schienen gueltig, aber Endbyte passt nicht.
+            // Das ist ein echter False-Sync (0xC9 0xDA zufaellig in RGB-Daten).
+            // 4 Bytes des Fake-Headers ueberspringen – das naechste echte 0xC9 liegt weiter hinten.
+            ESP_LOGD("uart_tpm2", "Falsches Endbyte 0x%02X an Pos %u, ueberspringe Header", fifo.readAt(4 + data_size), 4 + data_size);
+            fifo.advanceReadPos(4);
             frames_dropped_++;
             continue;
         }
