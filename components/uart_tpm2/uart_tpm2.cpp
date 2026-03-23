@@ -97,93 +97,64 @@ void UARTTPM2::loop()
     {
       return;
     }
-    while (fifo.available()) 
+    // Non-destruktiver Scan: readAt() prüft ohne Bytes zu konsumieren.
+    // Erst wenn Header UND Endbyte validiert sind, werden Bytes verbraucht.
+    // Dadurch kein "False-Sync" auf 0xC9 innerhalb von RGB-Nutzdaten und
+    // kein Index-OOB wenn das Paket noch nicht vollstaendig im FIFO ist.
+    while (fifo.available())
     {
-        unsigned char c = fifo.read();
-    
-        if (receiving_) 
-        {
-            current_packet_.push_back(c);
-            if (current_packet_.size() >= 4) // Mindestens Header + Paketgröße
-            {
-                if (current_packet_[0] == 0xC9 && current_packet_[1] == 0xDA) 
-                {
-                    // Cast zu uint8_t noetig: current_packet_ ist vector<char>, Bytes >=0x80
-                    // wuerden sonst sign-extended: z.B. 0xA4 -> 0xFFFFFFA4 -> data_size falsch.
-                    uint16_t data_size = ((uint8_t)current_packet_[2] << 8) | (uint8_t)current_packet_[3];
-                    uint16_t expected_size = 2 + 2 + data_size + 1; // Header(2) + Paketgröße(2) + Daten(data_size) + Endbyte(1)
+        // Mindestens 4 Bytes fuer den Header notwendig
+        if (fifo.getSize() < 4) return;
 
-                    //Direkter Check ob Endbyte passt, kopiere und springe vor!
-                    if (data_size == color_size_target && fifo.readAt(data_size) == 0x36)      //datasize = pos!
-                    {
-                      //Fertig!
-                      fifo.read(it_bg, data_size);    // read_pos liegt jetzt auf dem Endbyte
-                      receiving_ = false;
-                      frames_processed_++;
-                      // memcpy(it_bg, current_packet_.data() + 4, data_size); // Direkte Kopie der Daten in it_bg
-
-                      // Logge die Statistik alle 5 Sekunden
-                      uint32_t now = millis();
-                      if (now - last_log_time_ >= 5000) {
-                          log_frame_stats();
-                          last_log_time_ = now;
-                          frames_processed_ = 0; // Zurücksetzen der Frames für die nächste Periode
-                          frames_dropped_ = 0; // Zurücksetzen der verworfenen Frames
-                      }
-                      last_package_processed_time_ = millis();
-                      resetReception(); // Paket verarbeitet
-                      return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
-                    }
-                    else
-                    {
-                        ESP_LOGW("uart_tpm2", "Ungültiges Paket verworfen (data_size=%u, erwartet=%d, FIFO=%u)", data_size, color_size_target, fifo.getSize());
-                        //fifo.deleteBytes(data_size); ev. wurde das paket nach dem start erneut gesendet? es kostet nur minimal.
-                        last_package_processed_time_ = millis();
-                        resetReception(); // Paket verarbeitet
-                        frames_dropped_++;
-                        return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
-                    }
-                } 
-                else
-                {
-                    // Ungültiger Header, aber wir behalten das erste Byte, um zu sehen, ob es der Beginn eines neuen Pakets ist
-                    last_package_processed_time_ = millis();
-                    resetReception(); // Paket verarbeitet
-                    return; // Beende die Schleife, um ESPHome eine Chance zu geben, andere Aufgaben zu verarbeiten
-                }
-
-                
-                // else 
-                // {
-                  
-                //     // Ungültiger Header, aber wir behalten das erste Byte, um zu sehen, ob es der Beginn eines neuen Pakets ist
-                //     if (current_packet_[0] != 0xC9) 
-                //     {
-                //         ESP_LOGW("uart_tpm2", "Ungültiger Header");
-                //         frames_dropped_++;
-                //         resetReception(); // Reset und warte auf neues Paket
-                //     }
-                //     else if (current_packet_.size() == 1 && c != 0xDA) 
-                //     {
-                //         // Das erste Byte ist 0xC9, aber das zweite ist nicht 0xDA, resetten
-                //         ESP_LOGW("uart_tpm2", "Erwartet 0xDA nach 0xC9, aber bekommen %02X", (unsigned char)c);
-                //         frames_dropped_++;
-                //         resetReception(); // Reset und warte auf neues Paket
-                //     }
-                //     // Wenn hierher kommt, bedeutet es, dass wir 0xC9 erhalten haben und warten auf 0xDA
-                // }
-            }
-        } 
-        else // Wir sind nicht im Empfangsmodus
-        {
-            if (c == 0xC9) // Startbyte 1
-            {
-                current_packet_.push_back(c);
-                receiving_ = true;
-                start_time = millis(); // Setze den Startzeitpunkt, wenn wir anfangen, ein Paket zu empfangen
-            }
-            // Andere Zeichen ignorieren, bis wir 0xC9 sehen
+        // TPM2-Header prüfen (0xC9 0xDA)
+        if (fifo.readAt(0) != 0xC9 || fifo.readAt(1) != 0xDA) {
+            // Kein gueltiger Header-Start – ein Byte ueberspringen und von vorne
+            fifo.advanceReadPos(1);
+            frames_dropped_++;
+            continue;
         }
+
+        // Paketgroesse lesen (kein Sign-Extension-Problem, da readAt() unsigned char zurueckgibt)
+        uint16_t data_size = ((uint16_t)fifo.readAt(2) << 8) | (uint16_t)fifo.readAt(3);
+
+        // Plausibilitaet: nur die erwartete Groesse akzeptieren
+        if (data_size != (uint16_t)color_size_target) {
+            ESP_LOGD("uart_tpm2", "Ungueltiger data_size %u (erwartet %d), ueberspringe 1 Byte", data_size, color_size_target);
+            fifo.advanceReadPos(1);
+            frames_dropped_++;
+            continue;
+        }
+
+        // Warten bis das komplette Paket da ist: Header(4) + Nutzdaten(data_size) + Endbyte(1)
+        if (fifo.getSize() < (size_t)(4 + data_size + 1)) {
+            return; // Unvollstaendiges Paket – beim naechsten loop()-Aufruf weitermachen
+        }
+
+        // Endbyte 0x36 an der erwarteten Position prüfen
+        if (fifo.readAt(4 + data_size) != 0x36) {
+            ESP_LOGD("uart_tpm2", "Falsches Endbyte 0x%02X an Pos %u, ueberspringe 1 Byte", fifo.readAt(4 + data_size), 4 + data_size);
+            fifo.advanceReadPos(1);
+            frames_dropped_++;
+            continue;
+        }
+
+        // Gueltiges Paket – jetzt erst Bytes konsumieren
+        fifo.advanceReadPos(4);      // Header (0xC9 0xDA size_hi size_lo) ueberspringen
+        fifo.read(it_bg, data_size); // Nutzdaten direkt in it_bg lesen
+        fifo.advanceReadPos(1);      // Endbyte 0x36 ueberspringen
+        frames_processed_++;
+
+        // Statistik alle 5 Sekunden loggen
+        uint32_t now = millis();
+        if (now - last_log_time_ >= 5000) {
+            log_frame_stats();
+            last_log_time_ = now;
+            frames_processed_ = 0;
+            frames_dropped_ = 0;
+        }
+        last_package_processed_time_ = millis();
+        resetReception();
+        return; // ESPHome andere Aufgaben erledigen lassen
     }
 }
 
