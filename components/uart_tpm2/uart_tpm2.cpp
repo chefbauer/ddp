@@ -108,17 +108,16 @@ void UARTTPM2::loop()
             {
                 if (current_packet_[0] == 0xC9 && current_packet_[1] == 0xDA) 
                 {
-                    uint16_t data_size = (current_packet_[2] << 8) | current_packet_[3];
+                    // Cast zu uint8_t noetig: current_packet_ ist vector<char>, Bytes >=0x80
+                    // wuerden sonst sign-extended: z.B. 0xA4 -> 0xFFFFFFA4 -> data_size falsch.
+                    uint16_t data_size = ((uint8_t)current_packet_[2] << 8) | (uint8_t)current_packet_[3];
                     uint16_t expected_size = 2 + 2 + data_size + 1; // Header(2) + Paketgröße(2) + Daten(data_size) + Endbyte(1)
 
                     //Direkter Check ob Endbyte passt, kopiere und springe vor!
                     if (data_size == color_size_target && fifo.readAt(data_size) == 0x36)      //datasize = pos!
                     {
                       //Fertig!
-                      fifo.read(it_bg, data_size);    // read_pos sollte jetzt auf endbyte liegen
-                      current_packet_.push_back(c);   // sollte 0x36 sein
-                      current_packet_.push_back(c);   // zeilenumbruch
-
+                      fifo.read(it_bg, data_size);    // read_pos liegt jetzt auf dem Endbyte
                       receiving_ = false;
                       frames_processed_++;
                       // memcpy(it_bg, current_packet_.data() + 4, data_size); // Direkte Kopie der Daten in it_bg
@@ -137,7 +136,7 @@ void UARTTPM2::loop()
                     }
                     else
                     {
-                        ESP_LOGW("uart_tpm2", "Ungültiges Paket, verwerfe %u Bytes! -1 0 +1: %x %x %x", data_size, fifo.readAt(data_size-1), fifo.readAt(data_size), fifo.readAt(data_size+1));
+                        ESP_LOGW("uart_tpm2", "Ungültiges Paket verworfen (data_size=%u, erwartet=%d, FIFO=%u)", data_size, color_size_target, fifo.getSize());
                         //fifo.deleteBytes(data_size); ev. wurde das paket nach dem start erneut gesendet? es kostet nur minimal.
                         last_package_processed_time_ = millis();
                         resetReception(); // Paket verarbeitet
